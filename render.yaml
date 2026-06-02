@@ -37,3 +37,8 @@ services:
         fromDatabase:
           name: quizapp-db
           property: connectionString
+      # Cloudinary credentials for media storage. sync:false keeps the secret
+      # out of the repo — Render prompts you for it when you create the stack.
+      # Format: cloudinary://<api_key>:<api_secret>@<cloud_name>
+      - key: CLOUDINARY_URL
+        sync: false

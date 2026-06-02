@@ -113,6 +113,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_MANIFEST_STRICT = False
 
+# Media storage.
+# When CLOUDINARY_URL is set (e.g. on Render), user-uploaded media is stored
+# on Cloudinary so it survives the ephemeral container filesystem. Locally,
+# with no CLOUDINARY_URL, media falls back to the filesystem (MEDIA_ROOT).
+# Image fields use this default; video/audio fields pick their own Cloudinary
+# resource type via a per-field storage (see quiz/models.py).
+CLOUDINARY_CONFIGURED = bool(os.environ.get('CLOUDINARY_URL'))
+if CLOUDINARY_CONFIGURED:
+    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/quiz/'

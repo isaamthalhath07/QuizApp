@@ -71,25 +71,51 @@ Load it straight into the Render Postgres from your own machine:
 
 ---
 
-## 3. Media files (images / audio / video)  ⚠️ follow-up needed
+## 3. Media files (images / audio / video) — via Cloudinary
 
-Postgres stores your **data**, but the ~458 MB of uploaded **media** (Connect
-images, AudioVisual clips, Archive files) are real files. Render's default web
-filesystem is ephemeral, so:
+Postgres stores your **data**, but the uploaded **media** (Connect images,
+AudioVisual clips, Archive files) are real files. Render's web filesystem is
+ephemeral, so media is served from **Cloudinary** instead (free tier is plenty
+for this app). This is already wired into the code:
 
-- the rows load fine, but their images/clips will 404 until media has a home, and
-- any new uploads through the admin won't survive a redeploy.
+- `cloudinary` + `django-cloudinary-storage` are in `requirements.txt`.
+- When the `CLOUDINARY_URL` env var is present, `settings.py` routes media to
+  Cloudinary (images) and `models.py` routes video/audio to Cloudinary's video
+  storage. With no `CLOUDINARY_URL` (local dev) media stays on the filesystem.
+- `render.yaml` declares `CLOUDINARY_URL` as a secret (`sync: false`).
 
-Pick one of:
+### 3a. Create a Cloudinary account and set the credential
 
-- **Render persistent disk** — attach a disk to the web service, mount it at the
-  media root, and upload the existing `media/` folder to it (requires a paid
-  instance).
-- **External object storage** — e.g. Cloudinary or S3 via `django-storages`
-  (Cloudinary has a usable free tier). This is the more cloud-native choice.
+1. Sign up at <https://cloudinary.com> (free).
+2. On the dashboard copy the **API Environment variable** — it looks like
+   `cloudinary://<api_key>:<api_secret>@<cloud_name>`.
+3. In Render, open the **quizapp** web service → **Environment** → set
+   `CLOUDINARY_URL` to that value (Render asked for it when you applied the
+   Blueprint; set/confirm it here). Save — the service redeploys.
 
-Ask and I can wire up either one (the Cloudinary route is a small settings +
-requirements change).
+### 3b. Upload your existing media to Cloudinary
+
+A management command copies the existing `media/` files up and rewrites the DB
+references. Run it from your machine (which still has the `media/` folder),
+pointed at the **same** Render database and Cloudinary account you configured
+above:
+
+```bash
+pip install -r requirements.txt
+
+export DATABASE_URL="postgres://...(Render EXTERNAL url)..."
+export CLOUDINARY_URL="cloudinary://<api_key>:<api_secret>@<cloud_name>"
+export DJANGO_SECRET_KEY="anything-nonempty"
+export DJANGO_DEBUG="False"
+
+cd quiz_app
+python manage.py migrate_media_to_cloudinary --dry-run   # preview
+python manage.py migrate_media_to_cloudinary             # upload + fix references
+```
+
+Run this **after** loading the data in step 2 (the command updates rows that
+loaddata created). New uploads through the Django admin then go to Cloudinary
+automatically.
 
 ---
 

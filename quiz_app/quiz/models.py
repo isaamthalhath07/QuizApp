@@ -1,9 +1,27 @@
+import os
+
 from django.db import models
 import json
 
 from io import BytesIO
 from PIL import Image
 from django.core.files import File
+
+
+def video_storage():
+    """Per-field storage for video/audio uploads.
+
+    Cloudinary serves video and audio under its ``video`` resource type, which
+    differs from images. When CLOUDINARY_URL is configured we return Cloudinary's
+    video storage; otherwise we fall back to Django's default (filesystem) storage
+    so local development is unchanged. A *callable* is used so Django does not
+    serialize a concrete storage into migrations (keeps the schema untouched).
+    """
+    if os.environ.get('CLOUDINARY_URL'):
+        from cloudinary_storage.storage import VideoMediaCloudinaryStorage
+        return VideoMediaCloudinaryStorage()
+    from django.core.files.storage import default_storage
+    return default_storage
 
 
 def compress(image):
@@ -91,8 +109,8 @@ class AudioVisual(models.Model):
     display_answer = models.CharField(max_length=2000)
     is_Audio = models.BooleanField()
     is_Video = models.BooleanField()
-    video = models.FileField(upload_to='videos/', null=True, verbose_name="", blank=True)
-    audio = models.FileField(upload_to='audios/', null=True, verbose_name="", blank=True)
+    video = models.FileField(upload_to='videos/', null=True, verbose_name="", blank=True, storage=video_storage)
+    audio = models.FileField(upload_to='audios/', null=True, verbose_name="", blank=True, storage=video_storage)
 
     def __str__(self):
         return self.question_text
@@ -106,8 +124,8 @@ class Archive(models.Model):
     pub_date = models.DateTimeField()
     event = models.CharField(max_length=2000)
     title = models.CharField(max_length=2000)
-    video_file = models.FileField(upload_to='videos/', null=True, verbose_name="", blank=True)
-    audio_file = models.FileField(upload_to='audios/', null=True, verbose_name="", blank=True)
+    video_file = models.FileField(upload_to='videos/', null=True, verbose_name="", blank=True, storage=video_storage)
+    audio_file = models.FileField(upload_to='audios/', null=True, verbose_name="", blank=True, storage=video_storage)
     image_file = models.ImageField(blank=True)
     is_Image = models.BooleanField()
     is_Audio = models.BooleanField()
