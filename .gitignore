@@ -56,3 +56,8 @@ Thumbs.db
 .claude/
 
 .vercel
+
+# Data fixtures / dumps (may contain user password hashes — never commit to a public repo)
+render_data.json
+data.json
+dumperr.txt

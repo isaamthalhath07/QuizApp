@@ -1,0 +1,39 @@
+# Render Blueprint for QuizApp (Django + managed PostgreSQL)
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Create this stack from the Render dashboard:
+#   New +  ->  Blueprint  ->  pick the Fantasticlegend1000/QuizApp repo.
+# Render reads this file, provisions the database and web service, and
+# injects DATABASE_URL into the app. After the first deploy, load your
+# existing data (see DEPLOY_RENDER.md).
+
+databases:
+  - name: quizapp-db
+    databaseName: quizapp
+    user: quizapp
+    plan: free            # free Postgres has storage limits and expires; upgrade for production
+
+services:
+  - type: web
+    name: quizapp
+    runtime: python
+    plan: free            # free web services sleep after ~15 min idle; upgrade to keep it warm
+    region: oregon
+    branch: main
+    buildCommand: "pip install -r requirements.txt && cd quiz_app && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "cd quiz_app && gunicorn quiz_app.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true          # Render generates a strong secret and keeps it secret
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quizapp-db
+          property: connectionString
