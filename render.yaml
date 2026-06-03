@@ -1,0 +1,51 @@
+# Render Blueprint for QuizApp
+# Host:    Render (web service)
+# Database: Supabase PostgreSQL  (DATABASE_URL secret)
+# Media:    Cloudflare R2, S3-compatible  (AWS_* secrets)
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Create the stack from the Render dashboard:
+#   New +  ->  Blueprint  ->  pick the Fantasticlegend1000/QuizApp repo.
+# Render prompts for the sync:false secrets below. See DEPLOY_RENDER.md for
+# where to get each value and how to load your existing data + media.
+
+services:
+  - type: web
+    name: quizapp
+    runtime: python
+    plan: free            # free web services sleep after ~15 min idle; upgrade to keep it warm
+    region: oregon
+    branch: main
+    buildCommand: "pip install -r requirements.txt && cd quiz_app && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "cd quiz_app && gunicorn quiz_app.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true          # Render generates a strong secret and keeps it secret
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+
+      # --- Supabase PostgreSQL ---
+      # Paste the Supabase "Session pooler" connection string (IPv4 + SSL).
+      # Project Settings -> Database -> Connection string -> Session pooler.
+      - key: DATABASE_URL
+        sync: false
+
+      # --- Cloudflare R2 media storage (S3-compatible) ---
+      - key: AWS_ACCESS_KEY_ID
+        sync: false                  # R2 API token Access Key ID
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false                  # R2 API token Secret Access Key
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false                  # e.g. quizapp-media
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false                  # https://<account_id>.r2.cloudflarestorage.com
+      - key: AWS_S3_CUSTOM_DOMAIN
+        sync: false                  # public domain: pub-xxxx.r2.dev (or your custom domain)
+      - key: AWS_S3_REGION_NAME
+        value: "auto"                # R2 uses the "auto" region

@@ -897,3 +897,308 @@ background: linear-gradient(to right, #F37335, #FDC830); /* W3C, IE 10+/ Edge, F
       0 0 102px #ffd52e,
       0 0 151px #ffd52e;
 }
+
+/* ============================================================
+   RESPONSIVE / MOBILE-FRIENDLY LAYER
+   This app was originally built with fixed pixel widths (up to
+   2000px), absolute positioning and large inline font sizes.
+   The rules below retrofit a usable phone/tablet layout. They
+   are scoped inside media queries so the desktop layout is
+   untouched. Because most sizing lives in inline styles, many
+   overrides target the [style*="..."] substring and use
+   !important to win over the inline declaration.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- Tablets and below ---------- */
+@media (max-width: 1024px) {
+  nav { padding: 10px 24px; }
+  nav ul li a, .lastelement { padding: 12px 16px; font-size: 20px; }
+}
+
+/* ---------- Phones / small tablets ---------- */
+@media (max-width: 820px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  /* ---- Navigation ---- */
+  nav {
+    position: fixed;
+    height: auto !important;
+    min-height: 60px;
+    padding: 6px 10px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  nav .logo {
+    padding: 6px !important;
+    height: auto !important;
+    float: none !important;
+    width: 100%;
+    text-align: center;
+  }
+  nav .logo img {
+    width: 130px !important;
+    height: auto !important;
+    margin: 0 !important;
+  }
+  nav ul {
+    float: none !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+  }
+  nav ul li { line-height: 1.4 !important; }
+  nav ul li a,
+  .lastelement,
+  .navelement {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    padding: 6px 8px !important;
+    border-left-width: 1px !important;
+    border-right-width: 1px !important;
+  }
+  /* logout is now a <button> inside the nav */
+  nav ul li button.navelement {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    padding: 6px 8px !important;
+  }
+  /* hide the decorative avatar to save horizontal room */
+  nav ul > img { display: none !important; }
+
+  .wrapper {
+    height: auto !important;
+    min-height: 60px;
+  }
+
+  /* push page content below the (now taller) fixed nav */
+  body > div { padding-top: 8px; }
+
+  /* ---- Fluidize oversized fixed-width inline containers ---- */
+  [style*="width:2000px"], [style*="width:1800px"], [style*="width:1700px"],
+  [style*="width:1650px"], [style*="width:1500px"], [style*="width:1400px"],
+  [style*="width:1250px"], [style*="width:1220px"], [style*="width:1200px"],
+  [style*="width:1000px"], [style*="width: 1000px"], [style*="width:900px"],
+  [style*="width:700px"], [style*="width:600px"], [style*="width:580px"],
+  [style*="width:500px"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Collapse the tall fixed-height boxes so they grow with their content
+     instead of clipping/overlapping on a narrow screen */
+  [style*="height:1300px"], [style*="height:1200px"], [style*="height:1100px"],
+  [style*="height:1000px"], [style*="height:900px"], [style*="height:850px"],
+  [style*="height:800px"], [style*="height:500px"] {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  /* ...but keep answer textareas at a usable fixed height */
+  textarea, .TextInput { height: 200px !important; }
+
+  /* Un-anchor elements that were centred / pinned with transforms */
+  [style*="translate(-50%, -50%)"], [style*="translate(-50%,-50%)"] {
+    position: relative !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+  }
+
+  /* Neutralise off-canvas percentage offsets used on the home/quiz pages */
+  [style*="margin-left:65.5%"], [style*="left:5.5%"], [style*="top:23.5%"],
+  [style*="left:72.5%"], [style*="left:80%"], [style*="left: 40%"],
+  [style*="left:40%"], [style*="left: 20%"], [style*="right:23%"],
+  [style*="left:60%"], [style*="left:50%"], [style*="left:43%"],
+  [style*="left:33%"], [style*="left:85%"], [style*="left:75%"],
+  [style*="top:6%"], [style*="right:17%"], [style*="bottom:15%"],
+  [style*="bottom:85%"], [style*="bottom:76%"] {
+    position: relative !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+
+  /* Tame the largest inline font sizes so text doesn't overflow */
+  [style*="font-size:120px"] { font-size: 44px !important; }
+  [style*="font-size:60px"]  { font-size: 30px !important; }
+  [style*="font-size:50px"]  { font-size: 26px !important; }
+  [style*="font-size:40px"]  { font-size: 22px !important; }
+  [style*="font-size:35px"]  { font-size: 20px !important; }
+  [style*="font-size:30px"]  { font-size: 18px !important; }
+
+  /* ---- Login page ---- */
+  .loginform {
+    width: 92% !important;
+    max-width: 460px !important;
+    height: auto !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    margin: 90px auto 30px !important;
+    padding-bottom: 30px;
+  }
+  .loginBack { display: none !important; }
+  .loginform h1 { font-size: 30px !important; }
+  .loginerror { width: auto !important; left: 0 !important; }
+  .loginerror h2 { font-size: 22px !important; }
+  .input-field {
+    width: 100% !important;
+    height: 56px !important;
+    font-size: 18px !important;
+  }
+  .input-icons { margin-bottom: 24px !important; }
+  .submitbutton,
+  .submitbutton:hover,
+  .submitbutton:focus {
+    width: 100% !important;
+    height: 64px !important;
+    font-size: 22px !important;
+    left: 0 !important;
+  }
+
+  /* ---- Flashcards / flip cards ---- */
+  .flip-card {
+    width: 100% !important;
+    max-width: 340px !important;
+    height: 240px !important;
+    float: none !important;
+    margin: 20px auto !important;
+  }
+  .flip-card-back p {
+    width: 100% !important;
+    height: auto !important;
+    font-size: 15px !important;
+  }
+  .flip-card-back h1 { font-size: 22px !important; }
+
+  /* ---- Category tiles ---- */
+  .maincat {
+    float: none !important;
+    margin: 16px auto !important;
+    text-align: center;
+    display: block !important;
+  }
+  .maincat img { width: 90px !important; height: 75px !important; float: none !important; }
+  .maincat h3 { font-size: 26px !important; float: none !important; }
+  .categories { width: 100% !important; height: auto !important; margin: 16px auto !important; float: none !important; }
+
+  /* ---- Home "TAKE A QUIZ" modes ---- */
+  .mode {
+    display: block !important;
+    margin: 16px auto !important;
+    text-align: center;
+  }
+
+  /* ---- Connect / image grid ---- */
+  .grid-container {
+    width: 100% !important;
+    height: auto !important;
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid-container img { width: 100% !important; height: auto !important; }
+
+  /* ---- MCQ question cards & options ---- */
+  /* the question container (#q1, #q2, ... carries data-mode) must grow
+     with its stacked options rather than stay at its fixed height */
+  div[id^="q"][data-mode] {
+    height: auto !important;
+    padding-bottom: 24px !important;
+    margin: 24px auto !important;
+  }
+  /* the question text spans */
+  div[id^="q"][data-mode] > span {
+    width: auto !important;
+    margin: 16px 16px 0 !important;
+    font-size: 18px !important;
+    position: static !important;
+  }
+  /* each answer option: one per row, full width, no giant offsets */
+  div[data-question][data-answer] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 16px 0 !important;
+    display: block !important;
+    position: relative !important;
+    bottom: auto !important;
+    height: auto !important;
+    min-height: 70px !important;
+  }
+  div[data-question][data-answer] span { font-size: 18px !important; }
+  /* the "multiple answers may apply" note */
+  div[id^="q"][data-mode] > span[style*="margin-left:1200px"] {
+    margin-left: 16px !important;
+    position: static !important;
+    bottom: auto !important;
+  }
+
+  /* ---- Answer / explanation cards ---- */
+  .container { width: 100% !important; min-height: 0 !important; }
+  .card {
+    position: relative !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 20px auto !important;
+  }
+  .card h1, .card h2, .card h3 { font-size: 22px !important; }
+  .card p { font-size: 16px !important; word-break: break-word; }
+
+  /* ---- Hint box ---- */
+  #hinthere {
+    width: 92% !important;
+    left: 4% !important;
+    right: 4% !important;
+    position: relative !important;
+    bottom: auto !important;
+    font-size: 18px !important;
+  }
+
+  /* ---- Prev / next round buttons ---- */
+  .next, .previous {
+    width: 56px !important;
+    height: 56px !important;
+    font-size: 28px !important;
+    border-width: 3px !important;
+  }
+
+  /* ---- Generic text inputs / textareas ---- */
+  textarea, .TextInput {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 18px !important;
+    border-width: 4px !important;
+  }
+
+  /* Countdown bar (written mode) */
+  #divCountdownBar { width: 92% !important; left: 4% !important; }
+}
+
+/* ---------- Extra-small phones ---------- */
+@media (max-width: 420px) {
+  nav .logo img { width: 110px !important; }
+  nav ul li a, .navelement, nav ul li button.navelement { font-size: 12px !important; padding: 5px 6px !important; }
+  [style*="font-size:50px"] { font-size: 22px !important; }
+  [style*="font-size:40px"] { font-size: 20px !important; }
+  .maincat h3 { font-size: 22px !important; }
+}

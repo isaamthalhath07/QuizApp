@@ -110,7 +110,35 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+WHITENOISE_MANIFEST_STRICT = False
+
+# Media storage.
+# When Cloudflare R2 (S3-compatible) credentials are present (e.g. on Render),
+# user-uploaded media is stored on R2 so it survives the ephemeral container
+# filesystem. Locally, with no credentials, media falls back to the filesystem
+# (MEDIA_ROOT). R2 treats every object the same, so a single storage backend
+# covers images, audio and video alike.
+USE_S3_MEDIA = bool(
+    os.environ.get('AWS_STORAGE_BUCKET_NAME') and os.environ.get('AWS_S3_ENDPOINT_URL')
+)
+if USE_S3_MEDIA:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL')   # https://<account>.r2.cloudflarestorage.com
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'auto')
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_DEFAULT_ACL = None            # R2 does not support ACLs
+    AWS_QUERYSTRING_AUTH = False      # serve plain, unsigned public URLs
+    AWS_S3_FILE_OVERWRITE = False
+    # Public base domain for serving objects: an R2 public dev domain
+    # (pub-XXXX.r2.dev) or a custom domain bound to the bucket. Required for the
+    # media to be publicly viewable, since the S3 API endpoint itself is private.
+    _media_domain = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
+    if _media_domain:
+        AWS_S3_CUSTOM_DOMAIN = _media_domain
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

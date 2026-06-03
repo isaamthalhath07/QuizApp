@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-pip install -r requirements.txt
+python3 -m pip install --break-system-packages -r requirements.txt
 
 cd quiz_app
-python manage.py collectstatic --noinput --clear
+python3 manage.py collectstatic --noinput --clear
 
 cd ..
 mkdir -p staticfiles_build
