@@ -10,196 +10,71 @@
     resolve => setTimeout(resolve, ms)
   );
 }
-  var questions = []
-  var prevChoice;
+    // Clean MCQ grading.
+  // - single-select (data-mode="False"): the first click reveals the result;
+  //   correct -> green + "Correct!", wrong -> red and the right answer is shown.
+  // - multiple-select (data-mode="True"): each distinct correct option turns
+  //   green; the question completes (revealing the answer + explanation) once
+  //   ALL correct options are selected, or as soon as a wrong option is clicked.
+  //   Verdict is "Correct!" only if every correct option was found with no wrong
+  //   pick. Repeat clicks on the same option are ignored.
   function MCQIsCorrect(correct, option, element){
+    var qNum = element.getAttribute("data-question");
+    var question = document.getElementById("q" + qNum);
+    var correctSet = correct.split(",");
+    var allOptions = question.querySelectorAll("div[data-answer]");
 
-    var Question = element.getAttribute("data-question");
+    if (question.getAttribute("data-done") === "1") return;
+    if (element.getAttribute("data-clicked") === "1") return;
+    element.setAttribute("data-clicked", "1");
 
-    var co = correct.split(",");
+    var isCorrect = correctSet.indexOf(element.getAttribute("data-answer")) !== -1;
 
+    function paintGreen(el){ el.style.background = "#6ad93b"; el.style.color = "white"; el.style.border = "8px solid green"; }
+    function paintRed(el){ el.style.background = "#d9503b"; el.style.color = "white"; el.style.border = "8px solid red"; }
 
-    var question = document.getElementById("q" + Question);
-    var mco = []; //mco = multiple correct options
-    var correctOption;
-    var alloptions = document.getElementById("q" + Question).querySelectorAll("div");
-    if(question.getAttribute("data-mode") == "False"){ //checks if question is a multiple answer one, if it isnt it sets correctOption as the correct one
-
-    for (var i = 0; i < alloptions.length; i++){
-      elem = alloptions[i];
-      if (elem.getAttribute("data-answer") == correct){
-
-        correctOption = elem;
-      }
-
-
-
-    }}
-    else{ //if the question is a multiple choice one then, it checks if the elem matches all correct options for the multplie one, if it fits it puts it in mco
-        for (var i = 0; i < alloptions.length; i++){
-      elem = alloptions[i];
-
-      if (co.includes(elem.getAttribute("data-answer"))){
-
-        mco.push(elem);
-
-      }
-    }
-
-      if(question.getAttribute("data-tries") === "" && question.getAttribute("data-attempts") === ""){
-
-        document.getElementById("q" + Question).setAttribute("data-tries", (4 - co.length).toString());
-        console.log("set tries to:   " + question.getAttribute("data-tries"));
-
-        document.getElementById("q" + Question).setAttribute("data-attempts", (4 - parseInt(document.getElementById("q" + Question).getAttribute("data-tries"))).toString());
-        console.log("set attempts to:   " + question.getAttribute("data-attempts"));}
-    }
-
-
-
-
-
-    if(question.getAttribute("data-mode") == "True"){
-
-
-
-
-
-      if(element != prevChoice){
-        prevChoice = element;
-
-        if((co.includes(element.getAttribute("data-answer")) == true) && (parseInt(document.getElementById("q" + Question).getAttribute("data-tries")) > 0)){//choose a correct answers while ur tries are above 0, then marks the element as green and then reduces an attempt
-        if($("#expa" + Question).is(":visible") == false){
-          element.style.background = "#6ad93b";
-        element.style.color = "white";
-        element.style.border = "8px solid green";
-        console.log("before click attempt:      " + question.getAttribute("data-attempts"));
-        document.getElementById("q" + Question).setAttribute("data-attempts", (parseInt(document.getElementById("q" + Question).getAttribute("data-attempts")) - 1).toString());
-        console.log("after click attempt:      " + question.getAttribute("data-attempts"));}
-
-
-
+    function reveal(won){
+      question.setAttribute("data-done", "1");
+      for (var i = 0; i < allOptions.length; i++){
+        if (correctSet.indexOf(allOptions[i].getAttribute("data-answer")) !== -1){
+          paintGreen(allOptions[i]);
         }
-        if((co.includes(element.getAttribute("data-answer")) == false) && (parseInt(document.getElementById("q" + Question).getAttribute("data-tries")) > 0)){//choose a wrong answer while ur tries are above 0, then marks the element as red and then reduces the attempts by 1 and reduces tries bu 1 too
-          if($("#expa" + Question).is(":visible") == false){
-          element.style.background = "#d9503b";
-          element.style.color = "white";
-          element.style.border = "8px solid red";
-          console.log("before click tries" + question.getAttribute("data-tries"));
-          document.getElementById("q" + Question).setAttribute("data-tries", (parseInt(document.getElementById("q" + Question).getAttribute("data-tries")) - 1).toString());
-          console.log("after click tries" + question.getAttribute("data-tries"));
-          console.log("before click attempt" + question.getAttribute("data-attempts"));
-          document.getElementById("q" + Question).setAttribute("data-attempts", (parseInt(document.getElementById("q" + Question).getAttribute("data-attempts")) - 1).toString());
-          console.log("after click attempt" + question.getAttribute("data-attempts"));}
+      }
+      question.style.height = "850px";
+      $("#expa" + qNum).show();
+      if (won){
+        question.style.background = "linear-gradient(90deg, rgba(6,184,0,1) 0%, rgba(7,117,0,1) 100%)";
+        $("#correct" + qNum).show();
+      } else {
+        question.style.background = "linear-gradient(90deg, rgba(184,0,0,1) 0%, rgba(117,0,0,1) 100%)";
+        $("#wrong" + qNum).show();
+      }
+    }
+
+    if (question.getAttribute("data-mode") === "True"){
+      if (isCorrect){
+        paintGreen(element);
+        var found = parseInt(question.getAttribute("data-found") || "0") + 1;
+        question.setAttribute("data-found", found.toString());
+        if (found === correctSet.length){
+          reveal(question.getAttribute("data-hadwrong") !== "1");
         }
-
-
+      } else {
+        paintRed(element);
+        question.setAttribute("data-hadwrong", "1");
+        reveal(false);
       }
-console.log("attempts: "+document.getElementById("q" + Question).getAttribute("data-attempts"))
-console.log("element:  "+element);
-   console.log("tries:"+document.getElementById("q" + Question).getAttribute("data-tries"));
-if(parseInt(document.getElementById("q" + Question).getAttribute("data-attempts")) <= 0 && parseInt(document.getElementById("q" + Question).getAttribute("data-tries")) > 0 && mco.includes(element)==true){
-
-
-question.style.height = "850px";
-$("#expa" + Question).show();
- if($("#wrong" + Question).is(":visible") == false){
-document.getElementById("q" + Question).style.background = "linear-gradient(90deg, rgba(6,184,0,1) 0%, rgba(7,117,0,1) 100%)";
-$("#correct" + Question).show();}
-}
-console.log("check if correct" + parseInt(document.getElementById("q" + Question).getAttribute("data-tries")))
-if(parseInt(document.getElementById("q" + Question).getAttribute("data-tries")) == 0 ){
-
-        for(var i = 0; i < mco.length; i++){
-
-
-              mco[i].style.background = "#6ad93b";
-
-
-              mco[i].style.color = "white";
-
+    } else {
+      if (isCorrect){
+        paintGreen(element);
+        reveal(true);
+      } else {
+        paintRed(element);
+        reveal(false);
       }
-         question.style.height = "850px";
-
-  $("#expa" + Question).show();
-  if($("#correct" + Question).is(":visible") == false){
-  document.getElementById("q" + Question).style.background = "linear-gradient(90deg, rgba(184,0,0,1) 0%, rgba(117,0,0,1) 100%)";
-  $("#wrong" + Question).show();}}
-
-
-      }
-
-
-
-
-
-
-    else{
-    if (questions.length == 0){
-
-      questions.push(Question)
-
-       if (option == correct){
-
-        element.style.background = "#6ad93b";
-        element.style.color = "white";
-        element.style.border = "8px solid green";
-
-
     }
-    else {
-        element.style.background = "#d9503b";
-        element.style.color = "white";
-        element.style.border = "8px solid red";
-
-    }
-
-    }
-    if (questions.includes(Question)){
-
-
-    }
-    else{
-     questions.push(Question)
-
-     if (correct == option){
-
-        element.style.background = "#6ad93b";
-        element.style.color = "white";
-        element.style.border = "8px solid green";
-    }
-    else {
-        element.style.background = "#d9503b";
-        element.style.color = "white";
-        element.style.border = "8px solid red";
-
-
-    }}
-  if(element != correctOption){
-
-      correctOption.style.background = "#6ad93b";
-      correctOption.style.color = "white";
-      if($("#correct" + Question).is(":visible") == false){
-      document.getElementById("q" + Question).style.background = "linear-gradient(90deg, rgba(184,0,0,1) 0%, rgba(117,0,0,1) 100%)";
-      $("#wrong" + Question).show();}
-
-     }
-  if(element == correctOption){
-   if($("#wrong" + Question).is(":visible") == false){
-    document.getElementById("q" + Question).style.background = "linear-gradient(90deg, rgba(6,184,0,1) 0%, rgba(7,117,0,1) 100%)";
-  $("#correct" + Question).show();}
   }
 
-
-  question.style.height = "850px";
-
-  $("#expa" + Question).show();}
-
-
-
-
-
-}
 function togglemoreandless(e){
 
 question = e.target.id.replace("more", "");

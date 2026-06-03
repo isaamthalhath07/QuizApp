@@ -22,10 +22,10 @@
         <nav style="z-index:3;">
           <div class="logo"><img src="{% static 'assets/logo.png' %}" width="175.5" height="45"></div>
           <ul id="navbar">
-            <li><a href="http://localhost:8000/quiz/" class="selected navelement firstelement" style=" font-family: 'Montserrat';">Home</a></li>
-            <li><a href="http://localhost:8000/quiz/about/" class="navelement" style=" font-family: 'Montserrat';">About</a></li>
+            <li><a href="/quiz/" class="selected navelement firstelement" style=" font-family: 'Montserrat';">Home</a></li>
+            <li><a href="/quiz/about/" class="navelement" style=" font-family: 'Montserrat';">About</a></li>
 
-              <li><a href="http://localhost:8000/quiz/archive/" class="lastelement navelement" style=" font-family: 'Montserrat';">Archive</a></li>
+              <li><a href="/quiz/archive/" class="lastelement navelement" style=" font-family: 'Montserrat';">Archive</a></li>
             <li>
               <form action="/quiz/logout/" method="post" style="display:inline;">
                 {% csrf_token %}
