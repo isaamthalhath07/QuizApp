@@ -1476,3 +1476,87 @@ img, video {
 video.av-media{ aspect-ratio:16/9; height:auto; background:#000; box-shadow:var(--q-shadow); }
 audio.av-media{ height:48px; }
 
+/* ---- MCQ round ---- */
+.mcq-stage{ max-width:880px; margin:0 auto; padding:104px 16px 64px; }
+.mcq-card{
+  width:100% !important; max-width:760px !important; height:auto !important; min-height:0 !important;
+  margin:0 auto 28px !important; position:relative !important;
+  background:linear-gradient(135deg,#0d34ff 0%,#5b86c9 100%) !important;
+  border:none !important; border-radius:24px !important; box-shadow:var(--q-shadow-lg) !important;
+  padding:26px clamp(16px,4vw,34px) !important; display:flex; flex-direction:column;
+  transition:background .3s ease;
+}
+.mcq-card.answered-correct{ background:linear-gradient(135deg,#06b800,#077500) !important; }
+.mcq-card.answered-wrong{ background:linear-gradient(135deg,#b80000,#750000) !important; }
+.mcq-q{ color:#fff !important; font-size:clamp(18px,3vw,24px); font-weight:700; margin:0 0 6px; line-height:1.35; }
+.mcq-note{ color:#ffe200; font-size:14px; font-weight:700; margin:0 0 14px; }
+.mcq-option{
+  display:block !important; width:100% !important; max-width:100% !important; margin:0 0 14px !important;
+  cursor:pointer; text-align:left; box-sizing:border-box; position:relative !important;
+  background:linear-gradient(90deg,#ffffff,#feffd1); border-radius:16px !important;
+  box-shadow:0 6px 16px rgba(0,0,0,.25); padding:16px 18px !important;
+  font-size:clamp(16px,2.4vw,20px); font-weight:600; color:#1f1e1e;
+  border:3px solid transparent; transition:transform .12s ease; word-break:break-word; min-height:0 !important;
+}
+.mcq-option:hover{ transform:translateY(-2px); }
+.mcq-option.opt-correct{ background:#6ad93b !important; color:#fff !important; border-color:#0a8a00 !important; }
+.mcq-option.opt-wrong{ background:#d9503b !important; color:#fff !important; border-color:#8a1500 !important; }
+.mcq-verdict{ font-size:clamp(20px,3vw,26px); font-weight:900; margin:6px 0; }
+.mcq-correct{ color:#7dff8a; }
+.mcq-wrong{ color:#ffd5d5; }
+.mcq-exp{ color:#fff; margin-top:4px; }
+.mcq-exp .answer-line{ font-size:clamp(17px,2.6vw,22px); font-weight:700; margin:0 0 8px; color:#fff; }
+.mcq-exp .teaser, .mcq-exp .complete{ font-size:clamp(15px,2.2vw,18px); line-height:1.5; word-break:break-word; }
+.mcq-exp .more{ display:inline-block; margin-top:10px; color:#ffe200; font-weight:800; cursor:pointer; }
+
+/* ===================================================================
+   FUTURISTIC ACCENTS  — same orange/yellow/blue palette, more depth:
+   soft ambient glows, frosted-glass nav, glowing edges and hovers.
+   =================================================================== */
+
+/* Ambient depth on the page background (subtle, on-palette) */
+body{
+  background:
+    radial-gradient(900px 480px at 112% -8%, rgba(255,89,24,.10), transparent 60%),
+    radial-gradient(820px 460px at -12% 8%, rgba(255,206,0,.10), transparent 58%),
+    radial-gradient(900px 520px at 50% 120%, rgba(13,52,255,.07), transparent 60%),
+    var(--q-surface) !important;
+}
+
+/* Frosted-glass navbar with a glowing under-edge */
+nav{
+  background:rgba(255,255,255,.94) !important;
+  border-bottom:1px solid rgba(255,120,40,.40) !important;
+  box-shadow:0 6px 24px rgba(255,89,24,.10) !important;
+}
+.selected{
+  box-shadow:0 0 20px rgba(255,89,24,.55), 0 6px 16px rgba(255,89,24,.35) !important;
+}
+
+/* Cards: inner highlight + soft outer glow */
+.quiz-card, .mcq-card{
+  box-shadow:var(--q-shadow-lg), inset 0 1px 0 rgba(255,255,255,.6) !important;
+}
+.quiz-card::before{ box-shadow:0 0 18px rgba(255,120,30,.65); }
+.mcq-card{ position:relative !important; }
+.mcq-card::before{
+  content:""; position:absolute; inset:0; border-radius:24px; pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18), inset 0 0 40px rgba(13,52,255,.25);
+}
+
+/* Glowing hovers (buttons + tiles) */
+.submitbutton:hover, .hint-btn:hover{ filter:drop-shadow(0 0 12px rgba(255,170,40,.55)); }
+.mode:hover, .maincat:hover{ box-shadow:var(--q-shadow-lg), 0 0 24px rgba(255,89,24,.40) !important; }
+.flip-card:hover .flip-card-front{ box-shadow:0 0 26px rgba(255,89,24,.35); }
+
+/* Inputs glow when focused */
+.input-field:focus, .answer-input:focus, textarea:focus, .TextInput:focus{
+  box-shadow:0 0 0 4px rgba(255,89,24,.18), 0 0 18px rgba(255,89,24,.25) !important;
+}
+
+/* Timer track gets a faint neon edge */
+.timer-track{ box-shadow:inset 0 0 0 1px rgba(0,0,0,.05), 0 0 12px rgba(255,89,24,.25); }
+
+/* Answer options: subtle lift glow on hover */
+.mcq-option:hover{ box-shadow:0 8px 22px rgba(0,0,0,.30), 0 0 16px rgba(255,226,0,.35); }
+

@@ -4,25 +4,16 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="{% static 'assets/logic.js' %}"></script>
 <script>
-
-  function sleep(ms) {
-  return new Promise(
-    resolve => setTimeout(resolve, ms)
-  );
-}
-    // Clean MCQ grading.
-  // - single-select (data-mode="False"): the first click reveals the result;
-  //   correct -> green + "Correct!", wrong -> red and the right answer is shown.
-  // - multiple-select (data-mode="True"): each distinct correct option turns
-  //   green; the question completes (revealing the answer + explanation) once
-  //   ALL correct options are selected, or as soon as a wrong option is clicked.
-  //   Verdict is "Correct!" only if every correct option was found with no wrong
-  //   pick. Repeat clicks on the same option are ignored.
+  // MCQ grading.
+  // single-select (data-mode="False"): first click reveals; correct -> green,
+  //   wrong -> red and the right answer is highlighted.
+  // multiple-select (data-mode="True"): each distinct correct option greens;
+  //   resolves when ALL correct are found, or as soon as a wrong one is clicked.
   function MCQIsCorrect(correct, option, element){
     var qNum = element.getAttribute("data-question");
     var question = document.getElementById("q" + qNum);
     var correctSet = correct.split(",");
-    var allOptions = question.querySelectorAll("div[data-answer]");
+    var allOptions = question.querySelectorAll("[data-answer]");
 
     if (question.getAttribute("data-done") === "1") return;
     if (element.getAttribute("data-clicked") === "1") return;
@@ -30,23 +21,20 @@
 
     var isCorrect = correctSet.indexOf(element.getAttribute("data-answer")) !== -1;
 
-    function paintGreen(el){ el.style.background = "#6ad93b"; el.style.color = "white"; el.style.border = "8px solid green"; }
-    function paintRed(el){ el.style.background = "#d9503b"; el.style.color = "white"; el.style.border = "8px solid red"; }
+    function paintGreen(el){ el.classList.add("opt-correct"); }
+    function paintRed(el){ el.classList.add("opt-wrong"); }
 
     function reveal(won){
       question.setAttribute("data-done", "1");
       for (var i = 0; i < allOptions.length; i++){
-        if (correctSet.indexOf(allOptions[i].getAttribute("data-answer")) !== -1){
-          paintGreen(allOptions[i]);
-        }
+        if (correctSet.indexOf(allOptions[i].getAttribute("data-answer")) !== -1) paintGreen(allOptions[i]);
       }
-      question.style.height = "850px";
       $("#expa" + qNum).show();
       if (won){
-        question.style.background = "linear-gradient(90deg, rgba(6,184,0,1) 0%, rgba(7,117,0,1) 100%)";
+        question.classList.add("answered-correct");
         $("#correct" + qNum).show();
       } else {
-        question.style.background = "linear-gradient(90deg, rgba(184,0,0,1) 0%, rgba(117,0,0,1) 100%)";
+        question.classList.add("answered-wrong");
         $("#wrong" + qNum).show();
       }
     }
@@ -56,126 +44,55 @@
         paintGreen(element);
         var found = parseInt(question.getAttribute("data-found") || "0") + 1;
         question.setAttribute("data-found", found.toString());
-        if (found === correctSet.length){
-          reveal(question.getAttribute("data-hadwrong") !== "1");
-        }
+        if (found === correctSet.length) reveal(question.getAttribute("data-hadwrong") !== "1");
       } else {
         paintRed(element);
         question.setAttribute("data-hadwrong", "1");
         reveal(false);
       }
     } else {
-      if (isCorrect){
-        paintGreen(element);
-        reveal(true);
-      } else {
-        paintRed(element);
-        reveal(false);
-      }
+      if (isCorrect){ paintGreen(element); reveal(true); }
+      else { paintRed(element); reveal(false); }
     }
   }
 
-function togglemoreandless(e){
-
-question = e.target.id.replace("more", "");
-complete = document.getElementById("complete" + question);
-teaser = document.getElementById("teaser" + question);
-if(e.target.innerHTML == "Show more..."){
-
-complete.style.display = "block";
-
-document.getElementById("q" + question).style.height = (parseInt(complete.offsetHeight) + 100 + parseInt(document.getElementById("q" + question).style.height)).toString() + "px"
-
-teaser.style.display = "none";
-e.target.innerHTML = "Show less...";
-
-}
-else{
-
-complete.style.display = "none";
-document.getElementById("q" + question).style.height = "850px"
-teaser.style.display = "block";
-e.target.innerHTML = "Show more...";
-}
-
-}
-
+  function togglemoreandless(e){
+    var n = e.target.id.replace("more", "");
+    var complete = document.getElementById("complete" + n);
+    var teaser = document.getElementById("teaser" + n);
+    if (e.target.innerHTML.indexOf("more") !== -1){
+      complete.style.display = "block"; teaser.style.display = "none"; e.target.innerHTML = "Show less...";
+    } else {
+      complete.style.display = "none"; teaser.style.display = "block"; e.target.innerHTML = "Show more...";
+    }
+  }
 </script>
 
+<div class="mcq-stage">
+  <form action="">
+  {% for q in Questions %}
+  <div id="q{{forloop.counter}}" class="mcq-card" data-tries="" data-attempts="" data-mode="{{q.multiple}}">
 
-<div>
-<form action="">
-  {% for q in Questions%}
-  <div id="q{{forloop.counter}}" data-tries="" data-attempts="" style="width:1700px;height:500px;background: linear-gradient(90deg, rgba(13,52,255,1) 0%, rgba(130,175,194,1) 100%);;border: solid 1px grey; border-radius:20px;margin-bottom:70px;margin-top:150px;margin-right:100px;margin-left:30px;box-shadow: 0px 3px 18px 3px rgba(0, 0, 0, 0.7);" data-mode="{{q.multiple}}">
-    <span style="font-size:35px;margin:30px 50px 0px;display:inline-block;width:1650px;color:white;">{{ forloop.counter }})&nbsp&nbsp{{q.question_text}}</span>
-    <br>
-    <br>
-    <br>
-    {% if q.multiple %}
-       <span style="font-size:30px;display:block;color:white;margin-left:1200px;position:relative;bottom:30px;">*Multiple answers may appply</span>
+    <p class="mcq-q">{{ forloop.counter }})&nbsp;{{ q.question_text }}</p>
+    {% if q.multiple %}<p class="mcq-note">*Multiple answers may apply</p>{% endif %}
 
-    {% endif %}
-  <div data-question="{{ forloop.counter }}" data-answer="{{ q.option1 }}" id = "q{{ forloop.counter }}optionA" style="width:500px;height:100px;border: solid 1px grey;background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(254,255,81,1) 100%); border-radius:20px;margin-bottom:80px;margin-left:30px;margin-right:100px;box-shadow: 0px 3px 18px 3px rgba(0, 0, 0, 0.7);display:inline-block;position:relative;bottom:0px;" onclick="MCQIsCorrect('{{ q.answer_text }}', '{{ q.option1 }}', this)">
-    <span style="font-size:35px;display:table;margin:30px auto;">A) &nbsp&nbsp{{ q.option1 }}</span>
+    <div class="mcq-option" data-question="{{ forloop.counter }}" data-answer="{{ q.option1 }}" id="q{{ forloop.counter }}optionA" onclick="MCQIsCorrect('{{ q.answer_text }}', '{{ q.option1 }}', this)">A)&nbsp;&nbsp;{{ q.option1 }}</div>
+    <div class="mcq-option" data-question="{{ forloop.counter }}" data-answer="{{ q.option2 }}" id="q{{ forloop.counter }}optionB" onclick="MCQIsCorrect('{{ q.answer_text }}', '{{ q.option2 }}', this)">B)&nbsp;&nbsp;{{ q.option2 }}</div>
+    <div class="mcq-option" data-question="{{ forloop.counter }}" data-answer="{{ q.option3 }}" id="q{{ forloop.counter }}optionC" onclick="MCQIsCorrect('{{ q.answer_text }}', '{{ q.option3 }}', this)">C)&nbsp;&nbsp;{{ q.option3 }}</div>
+    <div class="mcq-option" data-question="{{ forloop.counter }}" data-answer="{{ q.option4 }}" id="q{{ forloop.counter }}optionD" onclick="MCQIsCorrect('{{ q.answer_text }}', '{{ q.option4 }}', this)">D)&nbsp;&nbsp;{{ q.option4 }}</div>
 
-  </div>
-    <div data-question="{{ forloop.counter }}" data-answer="{{ q.option2 }}" id = "q{{ forloop.counter }}optionB" style="width:500px;height:100px;border: solid 1px grey;background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(254,255,81,1) 100%); border-radius:20px;margin-bottom:80px;margin-right:100px;margin-left:30px;box-shadow: 0px 3px 18px 3px rgba(0, 0, 0, 0.7);display:inline-block;position:relative;bottom:0px;" onclick="MCQIsCorrect('{{ q.answer_text }}', '{{ q.option2 }}', this)">
-    <span style="font-size:35px;display:table;margin:30px auto;">B) &nbsp&nbsp{{ q.option2 }}</span>
-  </div>
+    <div id="correct{{forloop.counter}}" class="mcq-verdict mcq-correct" style="display:none;">Correct!</div>
+    <div id="wrong{{forloop.counter}}" class="mcq-verdict mcq-wrong" style="display:none;">Wrong</div>
 
-    <br>
-    <div data-question="{{ forloop.counter }}" data-answer="{{ q.option3 }}" id = "q{{ forloop.counter }}optionC" style="width:500px;height:100px;border: solid 1px grey;background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(254,255,81,1) 100%); border-radius:20px;margin-bottom:80px;margin-right:100px;margin-left:30px;box-shadow: 0px 3px 18px 3px rgba(0, 0, 0, 0.7);display:inline-block;position:relative; " onclick="MCQIsCorrect('{{ q.answer_text }}', '{{ q.option3 }}', this)">
-    <span style="font-size:35px;display:table;margin:30px auto;">C) &nbsp&nbsp{{ q.option3 }}</span>
-  </div>
-    <div data-question="{{ forloop.counter }}" data-answer="{{ q.option4 }}" id = "q{{ forloop.counter }}optionD"style="width:500px;height:100px;border: solid 1px grey;background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(254,255,81,1) 100%); border-radius:20px;margin-bottom:80px;margin-left:30px;box-shadow: 0px 3px 18px 3px rgba(0, 0, 0, 0.7);display:inline-block;position:relative;" onclick="MCQIsCorrect('{{ q.answer_text }}', '{{ q.option4 }}', this)">
-    <span style="font-size:35px;display:table;margin:30px auto;">D) &nbsp&nbsp{{ q.option4 }}</span>
-  </div>
-
-  <div id="correct{{forloop.counter}}" style="display:none;" ><span style="font-size:40px;display:block;margin:30px 30px auto;color:#47ff60;">Correct!</span></div>
-   <div id="wrong{{forloop.counter}}" style="display:none;" ><span style="font-size:40px;display:block;margin:30px 30px auto;color:#ff4747;">Wrong</span></div>
-
-  <div id="expa{{forloop.counter}}" style="display:none;" >
-      <span style="font-size:40px;display:block;margin:30px 30px auto;color:white;">Answer: {{ q.answer_text }}</span>
-      <span style="font-size:40px;display:block;margin:30px 30px auto;color:white;" class="teaser" id="teaser{{forloop.counter}}">Explanation: {{ q.explanation_text |truncatechars:50 }}</span>
-      <span class="complete" style="font-size:40px;margin:30px 30px auto;color:white;" id="complete{{forloop.counter}}">Explanation:{{ q.explanation_text}}</span>
-      <span class="more" id="more{{forloop.counter}}" onclick="togglemoreandless(event)">Show more...</span>
+    <div id="expa{{forloop.counter}}" class="mcq-exp" style="display:none;">
+      <p class="answer-line">Answer: {{ q.answer_text }}</p>
+      <span class="teaser" id="teaser{{forloop.counter}}">Explanation: {{ q.explanation_text|truncatechars:80 }}</span>
+      <span class="complete" id="complete{{forloop.counter}}" style="display:none;">Explanation: {{ q.explanation_text }}</span>
+      {% if q.explanation_text|length > 80 %}<span class="more" id="more{{forloop.counter}}" onclick="togglemoreandless(event)">Show more...</span>{% endif %}
     </div>
 
+  </div>
+  {% endfor %}
+  </form>
 </div>
-
-
-
-{% endfor %}
-  <br>
-
-
-</form>
-
-
-
-</div>
-
 {% endblock %}
-
-<div style="margin-left: 90px;">
-    <input type="radio" id="option1 {{ forloop.counter }}" name="question{{ forloop.counter }}" value="option1 {{ forloop.counter }}" >
-  <label for="option1 {{ forloop.counter }}" style="font-size:30px;">&nbsp{{ q.option1 }}</label>
-    </div>
-  <br>
-
-  <div style="margin-left: 90px;">
-  <input type="radio" id="option2 {{ forloop.counter }}" name="question{{ forloop.counter }}" value="option2 {{ forloop.counter }}">
-  <label for="option2 {{ forloop.counter }}" style="font-size:30px;">&nbsp{{ q.option2 }}</label>
-    </div>
-  <br>
-
-  <div style="margin-left: 90px;">
-  <input type="radio" id="option3 {{ forloop.counter }}" name="question{{ forloop.counter }}" value="option3 {{ forloop.counter }}">
-  <label for="option3 {{ forloop.counter }}" style="font-size:30px;">&nbsp{{ q.option3 }}</label>
-</div>
-  <br>
-
-  <div style="margin-left: 90px;">
-  <input type="radio" id="option4 {{ forloop.counter }}" name="question{{ forloop.counter }}" value="option4 {{ forloop.counter }}">
-  <label for="option4 {{ forloop.counter }}" style="font-size:30px;">&nbsp{{ q.option4 }}</label>
-</div>

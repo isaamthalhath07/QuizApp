@@ -52,7 +52,7 @@ Thumbs.db
 # Vercel
 .vercel/
 
-# Claude / Cowork
+# Local agent tooling
 .claude/
 
 .vercel
