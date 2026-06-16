@@ -70,6 +70,18 @@ def call_gemini(model, prompt, temperature, api_key=None):
     return data
 
 
+def gemini_classify(user_category, categories, api_key=None):
+    """Ask Gemini which of `categories` a topic best fits. Returns a list."""
+    prompt = (
+        "From this exact list of categories: %s\n"
+        "Pick the 1 or 2 that best fit the topic \"%s\".\n"
+        "Return ONLY a JSON array of the chosen category names, copied verbatim "
+        "from the list." % (", ".join(categories), user_category)
+    )
+    data = call_gemini(DEFAULT_MODEL, prompt, 0.2, api_key)
+    return [c for c in data if c in categories]
+
+
 def build_record(mode, item, category):
     """Map one clean JSON item to an unsaved model instance. Raises on bad data."""
     now = timezone.now()
@@ -102,19 +114,25 @@ def build_record(mode, item, category):
     raise ValueError("unknown mode %r" % mode)
 
 
-def generate(mode, category, count, prompt_template, model=None, temperature=0.9, api_key=None):
+def generate(mode, category, count, prompt_template, model=None, temperature=0.9,
+             api_key=None, store_category=None):
     """Call Gemini and build (unsaved) records.
+
+    `category` drives the prompt (the user's specific topic); `store_category`
+    (if given) is what gets written to each record's `category` field — typically
+    the mapped universal category/categories so the question indexes in the UI.
 
     Returns (records, errors) where records is a list of (raw_item, model_obj)
     and errors is a list of human-readable skip messages.
     """
     model = model or DEFAULT_MODEL
+    cat_for_db = store_category or category
     prompt = render_prompt(prompt_template, category, count)
     data = call_gemini(model, prompt, temperature, api_key)
     records, errors = [], []
     for i, item in enumerate(data, 1):
         try:
-            records.append((item, build_record(mode, item, category)))
+            records.append((item, build_record(mode, item, cat_for_db)))
         except (KeyError, ValueError, TypeError) as e:
             errors.append("#%d: %s" % (i, e))
     return records, errors
