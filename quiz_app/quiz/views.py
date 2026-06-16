@@ -1,5 +1,6 @@
 import random
 
+from django.core.cache import cache
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login as django_login
@@ -49,21 +50,61 @@ def _session_question_list(request, model_cls, cat, session_key):
     return state['ids']
 
 
-def loginl(request):
-    invalid = False
-    form = UserForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        username = form.cleaned_data['username']
-        password = form.cleaned_data['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            django_login(request, user)
-            return HttpResponseRedirect('/quiz/')
-        invalid = True
+# --- Login rate limiting (brute-force protection) ---
+# Per-IP failed-attempt counter in the cache. After LOGIN_MAX_FAILS failures
+# within LOGIN_FAIL_WINDOW seconds the IP is locked out for LOGIN_LOCKOUT
+# seconds. Uses Django's cache (LocMemCache by default — effective on a single
+# worker; use a shared cache like Redis for multi-instance deployments).
+LOGIN_MAX_FAILS = 5
+LOGIN_FAIL_WINDOW = 300      # 5 minutes
+LOGIN_LOCKOUT = 900         # 15 minutes
 
-    context = {"form": form, "error": invalid, "userboi": request.user.username}
+
+def _client_ip(request):
+    xff = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '') or 'unknown'
+
+
+def loginl(request):
+    ip = _client_ip(request)
+    lock_key = 'login_lock:%s' % ip
+    fail_key = 'login_fail:%s' % ip
+
+    invalid = False
+    locked = bool(cache.get(lock_key))
+    form = UserForm(request.POST or None)
+
+    if request.method == 'POST' and not locked:
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                django_login(request, user)
+                cache.delete(fail_key)
+                return HttpResponseRedirect('/quiz/')
+        invalid = True
+        # register the failed attempt; lock out once over the threshold
+        fails = (cache.get(fail_key) or 0) + 1
+        cache.set(fail_key, fails, LOGIN_FAIL_WINDOW)
+        if fails >= LOGIN_MAX_FAILS:
+            cache.set(lock_key, True, LOGIN_LOCKOUT)
+            cache.delete(fail_key)
+            locked = True
+
+    context = {
+        "form": form,
+        "error": invalid and not locked,
+        "locked": locked,
+        "lockout_minutes": LOGIN_LOCKOUT // 60,
+        "userboi": request.user.username if request.user.is_authenticated else "",
+    }
     template = loader.get_template('quiz/login.html')
-    return HttpResponse(template.render(context, request))
+    response = HttpResponse(template.render(context, request))
+    response['Cache-Control'] = 'no-store'   # don't cache the credentials page
+    return response
 
 
 @require_http_methods(["POST"])

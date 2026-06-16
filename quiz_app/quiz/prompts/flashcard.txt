@@ -1,0 +1,12 @@
+You are an expert educator. Generate {count} high-quality flashcards about: {category}.
+
+Requirements:
+- "question" is the front (a prompt, term, or question); "answer" is the back
+  (a concise, accurate response); "explanation" adds optional extra context.
+- Substantive and exam-level — not trivial. Factually accurate.
+- Vary subtopics. No duplicates.
+
+Return ONLY a JSON array (no prose, no markdown) of objects with this exact shape:
+[
+  { "question": "string", "answer": "string", "explanation": "string" }
+]

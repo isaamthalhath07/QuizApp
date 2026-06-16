@@ -86,6 +86,25 @@ The written / connect / audiovisual rounds match answers leniently, and the stor
 - `/answer` — fuzzy match (typos/case/spacing/word-order tolerant). Example: `/mont blanc:/montblanc`.
 - `/#answer` — spelling-tolerant (soundex). `/?answer` — exact, case-sensitive.
 
+## Generating questions with Gemini (in the admin)
+
+The Django admin has a built-in question generator powered by Google's Gemini API.
+
+1. Set the API key on the server: `GEMINI_API_KEY=...` (e.g. as a Render env var).
+2. Open **/admin/** and click **✨ Generate questions** in the header.
+3. Choose a type (**MCQ / Written / Flashcard / Facts**), enter a topic and how
+   many, optionally tweak the model/temperature and **the prompt** (editable in
+   the page), click **Preview**, then **Generate & save**.
+
+- The default prompts live in `quiz/prompts/<mode>.txt` and are loaded into the
+  editor; edit those files to permanently change tone, difficulty, or focus.
+- Gemini returns clean JSON; the app validates it (e.g. an MCQ's correct answer
+  must be one of its options) and stores it in the right fields, including the
+  written-answer matching syntax — so generated questions work immediately.
+- Connect / Audiovisual questions need media, so they're added by hand in the admin.
+
+`GEMINI_MODEL` can set the default model (otherwise `gemini-2.0-flash`).
+
 ## License
 
 No license specified yet — add one (e.g. MIT) if you intend others to reuse it.
