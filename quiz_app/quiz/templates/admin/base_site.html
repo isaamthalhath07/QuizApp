@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Quizite admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Quizite admin') }}</a></h1>
+{% endblock %}
+
+{% block nav-global %}
+<a href="{% url 'admin:generate_questions' %}"
+   style="color:#fff;font-weight:600;margin-left:18px;padding:6px 12px;border-radius:6px;background:linear-gradient(135deg,#ff5918,#ffce00);">
+  ✨ Generate questions
+</a>
+{% endblock %}

@@ -86,32 +86,24 @@ The written / connect / audiovisual rounds match answers leniently, and the stor
 - `/answer` — fuzzy match (typos/case/spacing/word-order tolerant). Example: `/mont blanc:/montblanc`.
 - `/#answer` — spelling-tolerant (soundex). `/?answer` — exact, case-sensitive.
 
-## Generating questions with Gemini
+## Generating questions with Gemini (in the admin)
 
-A management command can auto-author high-quality questions with Google's Gemini
-API and insert them straight into the database in the correct format.
+The Django admin has a built-in question generator powered by Google's Gemini API.
 
-```bash
-export GEMINI_API_KEY="...your key..."        # Windows PowerShell: $env:GEMINI_API_KEY="..."
-cd quiz_app
+1. Set the API key on the server: `GEMINI_API_KEY=...` (e.g. as a Render env var).
+2. Open **/admin/** and click **✨ Generate questions** in the header.
+3. Choose a type (**MCQ / Written / Flashcard / Facts**), enter a topic and how
+   many, optionally tweak the model/temperature and **the prompt** (editable in
+   the page), click **Preview**, then **Generate & save**.
 
-# 10 challenging MCQs about Physics
-python manage.py generate_questions --mode mcq --category Physics --count 10
+- The default prompts live in `quiz/prompts/<mode>.txt` and are loaded into the
+  editor; edit those files to permanently change tone, difficulty, or focus.
+- Gemini returns clean JSON; the app validates it (e.g. an MCQ's correct answer
+  must be one of its options) and stores it in the right fields, including the
+  written-answer matching syntax — so generated questions work immediately.
+- Connect / Audiovisual questions need media, so they're added by hand in the admin.
 
-# preview without saving
-python manage.py generate_questions --mode written --category History --count 8 --dry-run
-```
-
-- **Modes:** `mcq`, `written`, `flashcard`, `facts`. (Connect / Audiovisual need
-  media, so they are added via the admin.)
-- **Options:** `--count`, `--model` (default `gemini-2.0-flash`, or `$GEMINI_MODEL`),
-  `--temperature`, `--prompt-file`, `--dry-run`.
-- **The prompts are editable.** Each mode's instructions live in
-  `quiz/management/commands/prompts/<mode>.txt` — tweak them to change tone,
-  difficulty, or focus, or pass your own with `--prompt-file`.
-- Gemini returns clean JSON; the command validates it (e.g. an MCQ's correct
-  answer must be one of its options) and formats it into the DB fields,
-  including the written-answer matching syntax.
+`GEMINI_MODEL` can set the default model (otherwise `gemini-2.0-flash`).
 
 ## License
 
