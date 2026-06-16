@@ -102,13 +102,14 @@
     <img src="{% static 'assets/LoginBackground.png' %}" class="loginBack">
     <div class="logo"><img src="{% static 'assets/logo.png' %}" width="175.5" height="45" style="margin:30px;"></div>
     <h1>Log in to your account</h1>
-    {% if error == True %}
+    {% if locked %}
         <div class="loginerror">
-
-
+            <h2>Too many attempts. Try again in {{ lockout_minutes }} minutes.</h2>
+        </div>
+    {% elif error %}
+        <div class="loginerror">
             <h2>Please enter the correct credentials</h2>
         </div>
-
     {% endif %}
     <form style="max-width:450px;margin:auto;position:relative;top:15%;right:23%;" method="post">
             {% csrf_token %}

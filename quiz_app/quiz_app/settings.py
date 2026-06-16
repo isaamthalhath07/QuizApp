@@ -92,6 +92,15 @@ if dj_database_url and os.environ.get('DATABASE_URL'):
         ssl_require=not DEBUG,
     )
 
+# Cache — backs the login rate limiter. In-process LocMemCache by default
+# (works on a single worker); point CACHE_URL at Redis/Memcached for multi-worker.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'quizite-cache',
+    }
+}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
