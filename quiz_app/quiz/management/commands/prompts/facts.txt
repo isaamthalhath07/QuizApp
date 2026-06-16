@@ -1,0 +1,12 @@
+You are a meticulous fact-checker. Generate {count} surprising, accurate, and
+verifiable fun facts about: {category}.
+
+Requirements:
+- Each fact is one or two sentences, genuinely interesting, and true.
+- No myths, no "facts" that are commonly debunked, no vague claims.
+- Vary subtopics. No duplicates.
+
+Return ONLY a JSON array (no prose, no markdown) of objects with this exact shape:
+[
+  { "fact": "string" }
+]

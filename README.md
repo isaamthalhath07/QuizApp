@@ -86,6 +86,33 @@ The written / connect / audiovisual rounds match answers leniently, and the stor
 - `/answer` — fuzzy match (typos/case/spacing/word-order tolerant). Example: `/mont blanc:/montblanc`.
 - `/#answer` — spelling-tolerant (soundex). `/?answer` — exact, case-sensitive.
 
+## Generating questions with Gemini
+
+A management command can auto-author high-quality questions with Google's Gemini
+API and insert them straight into the database in the correct format.
+
+```bash
+export GEMINI_API_KEY="...your key..."        # Windows PowerShell: $env:GEMINI_API_KEY="..."
+cd quiz_app
+
+# 10 challenging MCQs about Physics
+python manage.py generate_questions --mode mcq --category Physics --count 10
+
+# preview without saving
+python manage.py generate_questions --mode written --category History --count 8 --dry-run
+```
+
+- **Modes:** `mcq`, `written`, `flashcard`, `facts`. (Connect / Audiovisual need
+  media, so they are added via the admin.)
+- **Options:** `--count`, `--model` (default `gemini-2.0-flash`, or `$GEMINI_MODEL`),
+  `--temperature`, `--prompt-file`, `--dry-run`.
+- **The prompts are editable.** Each mode's instructions live in
+  `quiz/management/commands/prompts/<mode>.txt` — tweak them to change tone,
+  difficulty, or focus, or pass your own with `--prompt-file`.
+- Gemini returns clean JSON; the command validates it (e.g. an MCQ's correct
+  answer must be one of its options) and formats it into the DB fields,
+  including the written-answer matching syntax.
+
 ## License
 
 No license specified yet — add one (e.g. MIT) if you intend others to reuse it.
