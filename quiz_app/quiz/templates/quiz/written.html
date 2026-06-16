@@ -3,82 +3,39 @@
 {% block body %}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-<style type="text/css">
-</style>
-
 <script src="{% static 'assets/logic.js' %}"></script>
-
-
 <script src="{% static 'assets/test.js' %}"></script>
-<!-- Indicators -->
-<!-- change ids to support multiple q's -->
 
-<!-- Wrapper for slides -->
+<div class="quiz-stage">
+  {% for q in Questions %}
+  <div id="{{forloop.counter}}active" class="quiz-card" data-tries="0">
 
-<div>
+    <div class="sentences quiz-question" id="qpara" data-answer="{{q.answer_text}}">
+      <p>{{ q.question_text }}</p>
+    </div>
 
-    {% for q in Questions %}
+    <div class="timer-row">
+      <div id="divCountdownBar" class="timer-track">
+        <div id="divTimeLeft" class="timer-fill"></div>
+      </div>
+      <div id="TimeLeft" class="timer-num">0</div>
+    </div>
 
-    <div class="container center" >
-  <div id="{{forloop.counter}}activecorrect" class="card" style="display:none;background:red;">
-         <h2 id="{{forloop.counter}}CorrectOrNot">Correct!</h2><br>
-    <h2>Answer:  {{q.display_answer}}</h2>
+    <textarea id="comment" class="TextInput answer-input" placeholder="Type your answer here..."></textarea>
 
-    <hr/>
-    <p>Explanation:  <br><br>{{q.explanation_text}}
-    </p>
+    <div id="{{forloop.counter}}activecorrect" class="feedback-card" style="display:none;">
+      <h2 id="{{forloop.counter}}CorrectOrNot" class="fb-verdict">Correct!</h2>
+      <h2 class="fb-answer">Answer:&nbsp;{{q.display_answer}}</h2>
+      <hr/>
+      <p class="fb-exp">Explanation:<br>{{q.explanation_text}}</p>
+    </div>
+
+    <div class="quiz-nav">
+      <button class="previous round" id="buttoon2" style="display:none;">&#8249;</button>
+      <button class="next round" id="buttoon" data-attr="{{Numberrr}}" style="display:none;">&#8250;</button>
+    </div>
 
   </div>
+  {% endfor %}
 </div>
-
-
-
-
-
-
-
-    <div  id="{{forloop.counter}}active" style="width:1800px;height:1200px;border: solid 1px grey;position: absolute;top: 50%;left: 40%;transform: translate(-50%, -50%); border-radius:20px;box-shadow: 0px 3px 18px 3px rgba(0, 0, 0, 0.7);padding:40px;font-size:20px;" data-tries="0">
-
-    <textarea id="comment" class="TextInput" style="resize: none;height:500px;width:1500px;border-radius: 10px;position: relative;top: 70%;left: 50%;transform: translate(-50%, -50%);box-shadow: 12px 12px 2px 1px rgba(0, 0, 255, .2);outline:none;border: 10px solid #000000;font-size:28px;border-radius:20px;font-family: 'Montserrat', sans-serif;font-size:40px;" placeholder="Type your answer here..."></textarea>
-    <div class="sentences" id="qpara" style="position:relative; bottom:41%;" data-answer="{{q.answer_text}}">
-        <p style="line-height:60px;font-size:30px;display:block;">{{ q.question_text }}</p>
-    </div>
-
-    </div>
-    <!-- Left and right controls -->
-
-    <button class="next round" style="display:none;position:absolute;bottom:50%;right:1%;" id="buttoon" data-attr="{{Numberrr}}">&#8250;</button>
-
-
-    <button  class="previous round" id="buttoon2"style="display:none;position:absolute;bottom:50%;left:1%;">&#8249;</button>
-
-    {% endfor %}
-    </div>
-
-
-</div>
-<div id="divCountdownBar" style="position:absolute;left:75%;bottom:85%;background:red;width:700px;
-    height:60px;
-
-    border-radius:10px;
-    background:linear-gradient(322deg, rgba(255,89,24,1) 0%, rgba(255,226,0,1) 100%);
-    ">
-    <div id="divTimeLeft" style="float:right;
-    background:lightgray;
-    border-bottom-right-radius: 10px;
-    background: linear-gradient(90deg, rgba(156,0,0,1) 0%, rgba(230,0,0,1) 100%);
-    height:60px;
-   ">
-
-    </div>
-</div>
-
-
-<div id="TimeLeft" style="position:absolute;left:85%;bottom:76%;font-size:120px;">5</div>
 {% endblock %}
-
-
-
-

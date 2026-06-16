@@ -110,8 +110,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-WHITENOISE_MANIFEST_STRICT = False
+# In production, hash static filenames so every deploy busts the browser cache
+# automatically. In DEBUG, runserver serves files from source (unhashed), so use
+# the plain compressed storage there to avoid 404s on hashed names.
+if DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_MANIFEST_STRICT = False  # tolerate any stray missing static refs
 
 # Media storage.
 # When Cloudflare R2 (S3-compatible) credentials are present (e.g. on Render),

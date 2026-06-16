@@ -3,51 +3,40 @@
 {% block body %}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-<style type="text/css">
-</style>
-
 <script src="{% static 'assets/logic.js' %}"></script>
-
-
-
 <script src="{% static 'assets/connect.js' %}"></script>
 
+<div class="quiz-stage">
+  <div class="quiz-card">
 
-<div class="grid-container">
-<img src="{{q.image_1.url}}">
-<img src="{{q.image_2.url}}">
-<img src="{{q.image_3.url}}">
-<img src="{{q.image_4.url}}">
-</div>
+    <div class="connect-grid">
+      <img src="{{q.image_1.url}}" alt="">
+      <img src="{{q.image_2.url}}" alt="">
+      <img src="{{q.image_3.url}}" alt="">
+      <img src="{{q.image_4.url}}" alt="">
+    </div>
 
-<h1 style="font-size:50px;position:absolute;top:6%;right:17%;" id="cquestion" data-answer="{{q.answer_text}}">{{q.question_text}}</h1>
+    <h2 class="quiz-question" id="cquestion" data-answer="{{q.answer_text}}">{{ q.question_text }}</h2>
 
+    <div class="hint-row">
+      <button type="button" id="hintbutton" class="hint-btn">Show hint</button>
+      <div id="hinthere" class="hint-text" style="display:none;">HINT: {{ q.hint_text }}</div>
+    </div>
 
-<textarea id="commentsss" class="TextInput" style="resize: none;height:500px;width:1000px;border-radius: 10px;position: absolute;bottom: 20%;left: 60%;transform: translate(-50%, -50%);box-shadow: 12px 12px 2px 1px rgba(0, 0, 255, .2);outline:none;border: 10px solid #000000;font-size:28px;border-radius:20px;font-family: 'Montserrat', sans-serif;font-size:40px;" placeholder="Type your answer here..."></textarea>
-<a class="myButtonddd" id="hintbutton"style="position:absolute; bottom:15%;left:43%;"><img src="{% static 'assets/questionhint.png' %}" style="width:80px;height:80px;position:relative;right:25px;" ></a>
-<div id="hinthere"><span>HINT: {{q.hint_text}}</span></div>
-    <div class="container center" >
-  <div id="asdactivecorrect" class="card" style="background:red;position:absolute;left:80%;bottom:30%;min-height:600px;">
-         <h2 id="asdCorrectOrNot">Correct!</h2><br>
-    <h2>Answer:  {{q.display_answer}}</h2>
+    <textarea id="commentsss" class="answer-input" placeholder="Type your answer here..."></textarea>
 
-    <hr/>
-    <p>Explanation:  <br><br>{{q.explanation_text}}
-    </p>
+    <div id="asdactivecorrect" class="feedback-card" style="display:none;">
+      <h2 id="asdCorrectOrNot" class="fb-verdict">Correct!</h2>
+      <h2 class="fb-answer">Answer:&nbsp;{{ q.display_answer }}</h2>
+      <hr/>
+      <p class="fb-exp">Explanation:<br>{{ q.explanation_text }}</p>
+    </div>
+
+    <div class="quiz-nav">
+      <button class="previous round" id="buttoon2" style="display:none;">&#8249;</button>
+      <button class="next round" id="buttoon" data-attr="{{Numberrr}}" style="display:none;">&#8250;</button>
+    </div>
 
   </div>
 </div>
-
-
-
-<button class="next round" style="display:none;position:absolute;bottom:50%;right:1%;" id="buttoon" href="" data-attr="{{Numberrr}}">&#8250;</button>
-
-
-<button  class="previous round" id="buttoon2" href="" style="display:none;position:absolute;bottom:50%;left:1%;">&#8249;</button>
 {% endblock %}
-
-
-
-
