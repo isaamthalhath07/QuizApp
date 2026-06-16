@@ -1560,3 +1560,188 @@ nav{
 /* Answer options: subtle lift glow on hover */
 .mcq-option:hover{ box-shadow:0 8px 22px rgba(0,0,0,.30), 0 0 16px rgba(255,226,0,.35); }
 
+/* ===================================================================
+   GLASSMORPHISM / LIQUID GLASS / BENTO   (final layer — overrides all)
+   Vibrant orange/yellow/blue gradient backdrop with frosted, light
+   glass panels (dark text stays readable) and bento-grid layouts.
+   =================================================================== */
+:root{
+  --glass:           rgba(255,255,255,.55);
+  --glass-strong:    rgba(255,255,255,.68);
+  --glass-tint-blue: rgba(20,70,255,.30);
+  --glass-border:    rgba(255,255,255,.65);
+  --glass-blur:      blur(20px) saturate(180%);
+  --glass-shadow:    0 10px 40px rgba(40,25,80,.22);
+  --glass-hi:        inset 0 1px 0 rgba(255,255,255,.85), inset 0 -1px 0 rgba(255,255,255,.18);
+  --glass-r:         26px;
+  --ink:             #211b16;
+}
+
+/* ---- Vibrant background (the "glass" sits on this) ---- */
+html{ min-height:100%; }
+body{
+  min-height:100vh;
+  color:var(--ink) !important;
+  background:
+    radial-gradient(closest-side at 12% 18%, rgba(255,89,24,.85), transparent 70%),
+    radial-gradient(closest-side at 88% 14%, rgba(255,206,0,.85), transparent 68%),
+    radial-gradient(closest-side at 78% 88%, rgba(13,90,255,.80), transparent 70%),
+    radial-gradient(closest-side at 18% 86%, rgba(255,72,128,.55), transparent 68%),
+    linear-gradient(135deg, #ff7a1a 0%, #ffd23d 38%, #6db5ff 100%) !important;
+  background-attachment:fixed !important;
+}
+/* floating liquid blobs for motion/depth */
+body::before{
+  content:""; position:fixed; inset:-20vmax; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(28vmax 28vmax at 20% 30%, rgba(255,255,255,.28), transparent 60%),
+    radial-gradient(24vmax 24vmax at 80% 70%, rgba(255,255,255,.20), transparent 60%);
+  filter:blur(8px);
+  animation:glassdrift 26s ease-in-out infinite alternate;
+}
+@keyframes glassdrift{ from{transform:translate3d(-3%,-2%,0) scale(1)} to{transform:translate3d(3%,3%,0) scale(1.08)} }
+
+/* ---- The glass surface, applied to every panel ---- */
+nav,
+.loginform,
+.quiz-card,
+.feedback-card,
+.flip-card-front, .flip-card-back,
+.mode, .maincat, .categories,
+.bento-fact, .bento-quiz, .bento-tile,
+.card{
+  background:var(--glass) !important;
+  -webkit-backdrop-filter:var(--glass-blur);
+  backdrop-filter:var(--glass-blur);
+  border:1px solid var(--glass-border) !important;
+  box-shadow:var(--glass-shadow), var(--glass-hi) !important;
+}
+
+/* ---- Navbar ---- */
+nav{
+  background:rgba(255,255,255,.45) !important;
+  border:none !important; border-bottom:1px solid rgba(255,255,255,.55) !important;
+  box-shadow:0 8px 30px rgba(40,25,80,.18) !important;
+}
+nav ul li a, .lastelement, .navelement, nav ul li button.navelement{ color:#2a1c10 !important; }
+.selected{
+  background:linear-gradient(135deg,rgba(255,89,24,.95),rgba(255,206,0,.95)) !important;
+  color:#fff !important; border:1px solid rgba(255,255,255,.6) !important;
+  box-shadow:0 6px 18px rgba(255,89,24,.45) !important;
+}
+
+/* ---- Headings on the gradient (outside glass) get a soft shadow for legibility ---- */
+h1, h3 { text-shadow:0 1px 10px rgba(0,0,0,.12); }
+
+/* ===================== BENTO: HOME ===================== */
+.bento{
+  max-width:1100px; margin:0 auto; padding:108px 18px 56px;
+  display:grid; grid-template-columns:repeat(6,1fr); gap:18px;
+}
+.bento-fact{ grid-column:span 6; border-radius:var(--glass-r) !important; padding:22px 26px; }
+.bento-fact .fact-label{ display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.04em;
+  text-transform:uppercase; color:#0d3bbf; font-size:14px; margin-bottom:8px; }
+.bento-fact .fact-body{ font-size:clamp(20px,2.6vw,30px); font-weight:800; line-height:1.25; color:var(--ink); }
+.bento-quiz-title{ grid-column:span 6; margin:6px 2px -4px; color:#fff; font-weight:900;
+  font-size:clamp(22px,3vw,30px); text-shadow:0 2px 14px rgba(0,0,0,.25); }
+.bento-tile{
+  grid-column:span 2; min-height:150px; border-radius:var(--glass-r) !important;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+  text-decoration:none; color:var(--ink) !important; cursor:pointer;
+  transition:transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s, background .25s;
+}
+.bento-tile:hover{
+  transform:translateY(-6px);
+  background:linear-gradient(135deg,rgba(255,89,24,.92),rgba(255,206,0,.92)) !important;
+  box-shadow:0 18px 44px rgba(255,89,24,.45), var(--glass-hi) !important;
+}
+.bento-tile:hover .bento-label, .bento-tile:hover .bento-icon{ color:#fff; filter:brightness(0) invert(1); }
+.bento-tile .bento-icon{ width:64px; height:64px; object-fit:contain; transition:.25s; }
+.bento-tile .bento-label{ font-size:clamp(18px,2.2vw,24px); font-weight:800; transition:.25s; }
+/* make the wide tiles span nicely */
+.bento-tile.wide{ grid-column:span 3; }
+
+/* ===================== BENTO: CATEGORIES ===================== */
+.cat-bento{
+  max-width:1100px; margin:0 auto; padding:14px 18px 56px;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px;
+}
+.cat-title{ text-align:center; color:#fff; font-weight:900; font-size:clamp(26px,4vw,44px);
+  margin:104px 0 6px; text-shadow:0 3px 18px rgba(0,0,0,.28); -webkit-text-fill-color:#fff; }
+.maincat{
+  float:none !important; margin:0 !important; width:auto !important; border-radius:var(--glass-r) !important;
+  padding:22px !important; display:flex !important; flex-direction:column; align-items:center; gap:12px;
+  transition:transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s, background .25s;
+}
+.maincat:hover{
+  transform:translateY(-6px);
+  background:linear-gradient(135deg,rgba(255,89,24,.92),rgba(255,206,0,.92)) !important;
+  box-shadow:0 18px 44px rgba(255,89,24,.45), var(--glass-hi) !important;
+}
+.maincat img{ width:96px !important; height:80px !important; float:none !important; object-fit:contain; }
+.maincat h3{ float:none !important; color:var(--ink) !important; font-size:clamp(20px,2.4vw,30px) !important; margin:0 !important; }
+.maincat:hover h3{ color:#fff !important; }
+.maincat:hover img{ filter:brightness(0) invert(1); }
+
+/* ===================== LOGIN ===================== */
+.loginform{ border-radius:30px !important; }
+.loginform h1{ -webkit-text-fill-color:initial; background:none; color:#2a1c10 !important; text-shadow:none; }
+.input-field{
+  background:rgba(255,255,255,.5) !important; border:1px solid var(--glass-border) !important;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); color:#211b16 !important;
+}
+
+/* ===================== BUTTONS ===================== */
+.submitbutton, .submitbutton:hover, .submitbutton:focus, .hint-btn{
+  background:linear-gradient(135deg,rgba(255,89,24,.95),rgba(255,206,0,.95)) !important;
+  border:1px solid rgba(255,255,255,.55) !important; color:#fff !important;
+  box-shadow:0 10px 26px rgba(255,89,24,.4), var(--glass-hi) !important;
+}
+.next, .previous{
+  background:rgba(255,255,255,.55) !important; -webkit-backdrop-filter:var(--glass-blur);
+  backdrop-filter:var(--glass-blur); border:1px solid var(--glass-border) !important; color:#2a1c10 !important;
+}
+
+/* ===================== QUIZ CARDS ===================== */
+.quiz-card{ border-radius:var(--glass-r) !important; }
+.quiz-question p, .quiz-question{ color:var(--ink) !important; }
+.answer-input, textarea.answer-input{
+  background:rgba(255,255,255,.5) !important; border:1px solid var(--glass-border) !important;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); color:#211b16 !important;
+}
+.timer-track{ border:1px solid rgba(255,255,255,.5); }
+
+/* feedback keeps strong colour but gains the glass sheen */
+.feedback-card{ background:linear-gradient(135deg,rgba(6,184,0,.82),rgba(7,117,0,.82)) !important; }
+.feedback-card.is-wrong{ background:linear-gradient(135deg,rgba(184,0,0,.82),rgba(117,0,0,.82)) !important; }
+
+/* ===================== MCQ ===================== */
+.mcq-card{
+  background:var(--glass-tint-blue) !important;
+  -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+  border:1px solid rgba(255,255,255,.45) !important;
+  box-shadow:var(--glass-shadow), var(--glass-hi) !important;
+}
+.mcq-card.answered-correct{ background:linear-gradient(135deg,rgba(6,184,0,.45),rgba(7,117,0,.5)) !important; }
+.mcq-card.answered-wrong{ background:linear-gradient(135deg,rgba(184,0,0,.45),rgba(117,0,0,.5)) !important; }
+.mcq-option{
+  background:rgba(255,255,255,.62) !important; border:1px solid var(--glass-border) !important;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); color:#211b16 !important;
+}
+.mcq-option.opt-correct{ background:rgba(106,217,59,.92) !important; color:#06340a !important; }
+.mcq-option.opt-wrong{ background:rgba(217,80,59,.92) !important; color:#3a0606 !important; }
+
+/* ===================== FLASHCARDS ===================== */
+.flip-card-front{ background:linear-gradient(135deg,rgba(255,89,24,.55),rgba(255,206,0,.55)) !important; color:#fff !important; }
+.flip-card-back{ background:var(--glass-strong) !important; }
+.flip-card-back p{ background:none !important; color:var(--ink) !important; }
+
+/* ===================== MOBILE ===================== */
+@media (max-width:820px){
+  .bento{ grid-template-columns:repeat(2,1fr); padding-top:96px; gap:14px; }
+  .bento-fact, .bento-quiz-title{ grid-column:span 2; }
+  .bento-tile, .bento-tile.wide{ grid-column:span 1; min-height:130px; }
+  .cat-bento{ grid-template-columns:repeat(2,1fr); gap:14px; }
+  body{ background-attachment:scroll !important; }   /* fixed bg is janky on mobile */
+}
+

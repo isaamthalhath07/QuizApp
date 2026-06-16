@@ -64,3 +64,6 @@ dumperr.txt
 
 # Local migration secrets (never commit)
 migrate.env
+
+# AI agent project guide (local only)
+CLAUDE.md

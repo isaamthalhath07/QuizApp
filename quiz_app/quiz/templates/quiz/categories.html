@@ -1,48 +1,15 @@
 {% extends "quiz/base.html" %}
 {% load static %}
-<script src="{% static 'assets/logic.js' %}"></script>
 {% block cat %}
 
+<h3 class="cat-title">Choose your category</h3>
 
-<h3 style="margin: auto;margin-top:70px;margin-bottom:50px;width:580px;font-size:50px;font-weight:800;background: -webkit-linear-gradient(318deg, rgba(251,91,18,1) 4%, rgba(157,0,255,0.8) 97%);
-  -webkit-background-clip: text;
-
-  -webkit-text-fill-color: transparent;">Choose your category</h3>
-<div style="width:1800px;height:1200px;border: solid 1px grey; border-radius:20px;margin: auto;box-shadow: 0px 3px 18px 3px rgba(0, 0, 0, 0.7);">
-
-<a href="questions/All" ><div class="maincat" id="All">
-        <img src="{%static 'assets/All.png'%}">
-    <h3>ALL</h3></div></a>
-<a href="questions/Random" ><div class="maincat" id="All">
-        <img src="{%static 'assets/Random.png'%}">
-    <h3>RANDOM</h3></div></a>
-{% for cat, subcat in Category.items %}
-
-    <a href="{{cat}}" ><div class="maincat" id="{{cat}}" onclick="linkgobrr(this)">
-        <img src="{%static 'assets/'%}{{cat}}.png">
-
-        <h3>{{cat.upper}}</h3>
-
-
-
-
-
-    </div></a>
-
-    <!--
-    {% for item in subcat %}
-    <a href="#">{{ item}}</a>
-    {% endfor %}
-    -->
-{%endfor%}
-
-
-
-
-
-
-
-
-
+<div class="cat-bento">
+  <a class="maincat" href="questions/All"><img src="{% static 'assets/All.png' %}" alt=""><h3>ALL</h3></a>
+  <a class="maincat" href="questions/Random"><img src="{% static 'assets/Random.png' %}" alt=""><h3>RANDOM</h3></a>
+  {% for cat, subcat in Category.items %}
+  <a class="maincat" href="{{ cat }}"><img src="{% static 'assets/' %}{{ cat }}.png" alt=""><h3>{{ cat.upper }}</h3></a>
+  {% endfor %}
 </div>
+
 {% endblock %}
