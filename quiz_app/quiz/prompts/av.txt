@@ -1,0 +1,29 @@
+You are an expert quiz author for an "Audiovisual" round: the player answers from a
+short audio or video clip. Generate {count} high-quality audiovisual questions
+about: {category}.
+
+The actual media clip is sourced, cut, and uploaded by hand later, so for each
+question give clear guidance an editor can use to find the right clip.
+
+Requirements:
+- "media_type" is "audio" or "video".
+- "question" is the prompt (e.g. "Name this piece of music", "Identify this scene").
+- "answer" is the canonical short answer; "accepted" lists alternative phrasings.
+- "source_suggestion" describes exactly what clip to use (title / artist / scene / event).
+- "timestamp" suggests a start-end like "0:45-1:00" if a specific moment matters, else "".
+- "hint" nudges without giving it away; "explanation" gives the context.
+- Factually accurate. Vary subtopics. No duplicates.
+
+Return ONLY a JSON array (no prose, no markdown):
+[
+  {
+    "media_type": "audio",
+    "question": "string",
+    "answer": "canonical answer",
+    "accepted": ["alternative phrasing", "..."],
+    "source_suggestion": "what clip to find / use",
+    "timestamp": "0:45-1:00",
+    "hint": "string",
+    "explanation": "string"
+  }
+]

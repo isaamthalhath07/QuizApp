@@ -5,7 +5,11 @@
 
   <p style="max-width:760px;">Generate quiz questions with the Gemini API and add them straight to the database.
   Pick a type and topic, tweak the prompt if you like, <strong>Preview</strong> the result, then
-  <strong>Generate &amp; save</strong>.</p>
+  <strong>Generate &amp; save</strong>. Your topic is auto-mapped to a universal category so the
+  questions index in the site UI.</p>
+  <p style="max-width:760px;color:#555;"><strong>Connect</strong> and <strong>Audiovisual</strong>
+  generate the text only — after saving, open each one under its model in the admin and upload the
+  images / audio / video (the preview lists what to source).</p>
 
   {% if not has_api_key %}
   <p class="errornote">The <code>GEMINI_API_KEY</code> environment variable is not set on the server,
@@ -72,6 +76,19 @@
       {% if p.explanation %}<p style="margin:0;color:#555;"><em>{{ p.explanation }}</em></p>{% endif %}
     {% elif p.mode == 'facts' %}
       <p style="margin:0;">{{ forloop.counter }}. {{ p.fact }}</p>
+    {% elif p.mode == 'connect' %}
+      <p style="margin:0 0 4px;"><strong>{{ forloop.counter }}. {{ p.question }}</strong></p>
+      <p style="margin:0 0 4px;">Answer: <strong>{{ p.answer }}</strong>{% if p.accepted %} <span style="color:#777;">(also: {{ p.accepted|join:", " }})</span>{% endif %}</p>
+      {% if p.images %}<p style="margin:4px 0 2px;">Images to source &amp; upload by hand:</p>
+        <ol style="margin:0 0 4px 20px;">{% for d in p.images %}<li>{{ d }}</li>{% endfor %}</ol>{% endif %}
+      {% if p.hint %}<p style="margin:2px 0;color:#555;">Hint: {{ p.hint }}</p>{% endif %}
+      {% if p.explanation %}<p style="margin:0;color:#555;"><em>{{ p.explanation }}</em></p>{% endif %}
+    {% elif p.mode == 'av' %}
+      <p style="margin:0 0 4px;"><strong>{{ forloop.counter }}. {{ p.question }}</strong> <span style="color:#777;">({{ p.media_type }})</span></p>
+      <p style="margin:0 0 4px;">Answer: <strong>{{ p.answer }}</strong>{% if p.accepted %} <span style="color:#777;">(also: {{ p.accepted|join:", " }})</span>{% endif %}</p>
+      {% if p.source %}<p style="margin:2px 0;">Clip to source &amp; upload by hand: {{ p.source }}{% if p.timestamp %} <strong>[{{ p.timestamp }}]</strong>{% endif %}</p>{% endif %}
+      {% if p.hint %}<p style="margin:2px 0;color:#555;">Hint: {{ p.hint }}</p>{% endif %}
+      {% if p.explanation %}<p style="margin:0;color:#555;"><em>{{ p.explanation }}</em></p>{% endif %}
     {% endif %}
   </div>
   {% endfor %}

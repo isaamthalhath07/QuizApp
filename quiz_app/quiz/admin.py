@@ -4,6 +4,7 @@ from django.template.response import TemplateResponse
 from django.urls import path
 
 from . import gemini
+from . import taxonomy
 from .models import Question, MCQ, Written, Connect, AudioVisual, Facts, Archive
 
 admin.site.register(Question)
@@ -39,6 +40,22 @@ def _preview_entry(mode, raw):
         entry["explanation"] = raw.get("explanation", "")
     elif mode == "facts":
         entry["fact"] = raw.get("fact", "")
+    elif mode == "connect":
+        entry["question"] = raw.get("question", "")
+        entry["answer"] = raw.get("answer", "")
+        entry["accepted"] = raw.get("accepted", [])
+        entry["images"] = raw.get("images", [])
+        entry["hint"] = raw.get("hint", "")
+        entry["explanation"] = raw.get("explanation", "")
+    elif mode == "av":
+        entry["question"] = raw.get("question", "")
+        entry["answer"] = raw.get("answer", "")
+        entry["accepted"] = raw.get("accepted", [])
+        entry["media_type"] = raw.get("media_type", "")
+        entry["source"] = raw.get("source_suggestion", "")
+        entry["timestamp"] = raw.get("timestamp", "")
+        entry["hint"] = raw.get("hint", "")
+        entry["explanation"] = raw.get("explanation", "")
     return entry
 
 
@@ -81,9 +98,18 @@ def generate_questions_view(request):
         if not category:
             messages.error(request, "Please enter a category / topic.")
         else:
+            # Map the typed topic to the universal routing categories so the
+            # questions index in the UI even if the topic isn't a main category.
+            classify_cb = (lambda uc, cats: gemini.gemini_classify(uc, cats)) if gemini.has_api_key() else None
+            store_cat, mapped = taxonomy.storage_category(category, gemini_classify=classify_cb)
+            context["mapped"] = mapped
+            context["store_cat"] = store_cat
             try:
                 records, errors = gemini.generate(mode, category, count, prompt,
-                                                  model=model, temperature=temperature)
+                                                  model=model, temperature=temperature,
+                                                  store_category=store_cat)
+                messages.info(request, "“%s” mapped to: %s  (stored as %s)"
+                              % (category, ", ".join(mapped), store_cat))
                 for e in errors:
                     messages.warning(request, "Skipped " + e)
                 if action == "save":

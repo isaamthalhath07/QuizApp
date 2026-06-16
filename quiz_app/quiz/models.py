@@ -71,11 +71,15 @@ class Connect(models.Model):
         return self.question_text
 
     def save(self, *args, **kwargs):
-        # call the compress function
-        self.image_1= compress(self.image_1)
-        self.image_2= compress(self.image_2)
-        self.image_3= compress(self.image_3)
-        self.image_4= compress(self.image_4)
+        # Compress each image, but only if one is actually set — so a Connect can
+        # be created with its text first and the images uploaded later.
+        for field in ('image_1', 'image_2', 'image_3', 'image_4'):
+            img = getattr(self, field)
+            if img:
+                try:
+                    setattr(self, field, compress(img))
+                except Exception:
+                    pass
 
         # save
         super().save(*args, **kwargs)
