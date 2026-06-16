@@ -13,10 +13,13 @@ import urllib.request
 
 from django.utils import timezone
 
-from quiz.models import MCQ, Written, Question, Facts
+from quiz.models import MCQ, Written, Question, Facts, Connect, AudioVisual
 
-MODES = ("mcq", "written", "flashcard", "facts")
-MODE_LABELS = {"mcq": "MCQ", "written": "Written", "flashcard": "Flashcard", "facts": "Facts"}
+MODES = ("mcq", "written", "flashcard", "facts", "connect", "av")
+MODE_LABELS = {"mcq": "MCQ", "written": "Written", "flashcard": "Flashcard",
+               "facts": "Facts", "connect": "Connect", "av": "Audiovisual"}
+# Connect and AV generate the text only; their media is uploaded by hand in the admin.
+TEXT_ONLY_MEDIA_MODES = ("connect", "av")
 PROMPTS_DIR = os.path.join(os.path.dirname(__file__), "prompts")
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
 DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
@@ -104,14 +107,35 @@ def build_record(mode, item, category):
                    explanation_text=item.get("explanation", ""), category=category, pub_date=now)
     if mode == "written":
         answer = item["answer"].strip()
-        seen, variants = set(), []
-        for a in [answer] + [x.strip() for x in item.get("accepted", []) if x and x.strip()]:
-            if a.lower() not in seen:
-                seen.add(a.lower()); variants.append("/" + a)
-        return Written(question_text=item["question"], answer_text=":".join(variants),
+        return Written(question_text=item["question"], answer_text=_answer_syntax(answer, item.get("accepted")),
                        display_answer=answer, explanation_text=item.get("explanation", ""),
                        category=category, pub_date=now)
+    if mode == "connect":
+        answer = item["answer"].strip()
+        return Connect(question_text=item["question"], answer_text=_answer_syntax(answer, item.get("accepted")),
+                       display_answer=answer, hint_text=item.get("hint", ""),
+                       explanation_text=item.get("explanation", ""), category=category,
+                       isTimed=False, pub_date=now)  # images uploaded by hand
+    if mode == "av":
+        answer = item["answer"].strip()
+        media_type = (item.get("media_type") or "audio").strip().lower()
+        return AudioVisual(question_text=item["question"], answer_text=_answer_syntax(answer, item.get("accepted")),
+                           display_answer=answer, hint_text=item.get("hint", ""),
+                           explanation_text=item.get("explanation", ""), category=category,
+                           is_Audio=(media_type != "video"), is_Video=(media_type == "video"),
+                           pub_date=now)  # media uploaded by hand
     raise ValueError("unknown mode %r" % mode)
+
+
+def _answer_syntax(answer, accepted):
+    """Build the '/canonical:/alt1:/alt2' fuzzy-match command syntax used by the
+    free-text rounds (written / connect / av)."""
+    answer = (answer or "").strip()
+    seen, variants = set(), []
+    for a in [answer] + [x.strip() for x in (accepted or []) if x and x.strip()]:
+        if a and a.lower() not in seen:
+            seen.add(a.lower()); variants.append("/" + a)
+    return ":".join(variants)
 
 
 def generate(mode, category, count, prompt_template, model=None, temperature=0.9,

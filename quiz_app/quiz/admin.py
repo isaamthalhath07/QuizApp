@@ -40,6 +40,22 @@ def _preview_entry(mode, raw):
         entry["explanation"] = raw.get("explanation", "")
     elif mode == "facts":
         entry["fact"] = raw.get("fact", "")
+    elif mode == "connect":
+        entry["question"] = raw.get("question", "")
+        entry["answer"] = raw.get("answer", "")
+        entry["accepted"] = raw.get("accepted", [])
+        entry["images"] = raw.get("images", [])
+        entry["hint"] = raw.get("hint", "")
+        entry["explanation"] = raw.get("explanation", "")
+    elif mode == "av":
+        entry["question"] = raw.get("question", "")
+        entry["answer"] = raw.get("answer", "")
+        entry["accepted"] = raw.get("accepted", [])
+        entry["media_type"] = raw.get("media_type", "")
+        entry["source"] = raw.get("source_suggestion", "")
+        entry["timestamp"] = raw.get("timestamp", "")
+        entry["hint"] = raw.get("hint", "")
+        entry["explanation"] = raw.get("explanation", "")
     return entry
 
 

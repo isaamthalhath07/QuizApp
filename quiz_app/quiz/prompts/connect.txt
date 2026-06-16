@@ -1,0 +1,27 @@
+You are an expert quiz author for a "Connect" round: the player sees a 2x2 grid of
+4 images and must work out what links them. Generate {count} high-quality Connect
+puzzles about: {category}.
+
+For each puzzle pick a single concept/answer, then choose 4 things (people, logos,
+objects, places, scenes) that all connect to it. The images are sourced and
+uploaded by hand later, so describe each of the 4 images clearly enough for an
+editor to find or create them.
+
+Requirements:
+- "question" is the prompt shown to the player (e.g. "What links these four?").
+- "answer" is the canonical short answer; "accepted" lists alternative phrasings.
+- "images" is a list of EXACTLY 4 short descriptions, one per grid image.
+- "hint" nudges without giving it away; "explanation" states the connection.
+- Clever but fair, factually accurate. Vary subtopics. No duplicates.
+
+Return ONLY a JSON array (no prose, no markdown):
+[
+  {
+    "question": "What do these four have in common?",
+    "answer": "canonical answer",
+    "accepted": ["alternative phrasing", "..."],
+    "images": ["image 1 description", "image 2 description", "image 3 description", "image 4 description"],
+    "hint": "string",
+    "explanation": "string"
+  }
+]
