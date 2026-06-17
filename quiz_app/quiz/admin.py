@@ -13,7 +13,30 @@ admin.site.register(Written)
 admin.site.register(Connect)
 admin.site.register(AudioVisual)
 admin.site.register(Facts)
-admin.site.register(Archive)
+
+
+@admin.register(Archive)
+class ArchiveAdmin(admin.ModelAdmin):
+    list_display = ("title", "event", "media_kind", "has_link", "pub_date")
+    list_filter = ("event", "is_Video", "is_Audio", "is_Image")
+    search_fields = ("title", "event")
+    fields = ("event", "title", "pub_date", "media_url",
+              "video_file", "audio_file", "image_file",
+              "is_Video", "is_Audio", "is_Image")
+
+    @admin.display(description="Type")
+    def media_kind(self, obj):
+        info = obj.embed_info()
+        if info:
+            return "link (%s)" % info["kind"]
+        for label, flag in (("video", obj.is_Video), ("audio", obj.is_Audio), ("image", obj.is_Image)):
+            if flag:
+                return "file (%s)" % label
+        return "—"
+
+    @admin.display(boolean=True, description="Link?")
+    def has_link(self, obj):
+        return bool(obj.media_url)
 
 
 @admin.register(Score)

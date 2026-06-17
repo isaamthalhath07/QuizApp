@@ -1,157 +1,50 @@
 {% extends "quiz/base.html" %}
 {% load static %}
 
-
 {% block cat %}
-
 
 <script src="{% static 'assets/logic.js' %}"></script>
 
 {% for title in titles %}
+<div class="archive-stage">
+  <h1 class="archive-title">{{ title.title }}</h1>
 
-{%if title.is_Audio%}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://wvus-ibu.github.io/swing/css/style.css">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-<script>
-
-
-
-window.onload = function(){
-
-  var music = document.getElementById("music");
-var playButton = document.getElementById("play");
-var playhead = document.getElementById("elapsed");
-var timeline = document.getElementById("slider");
-var rewind = document.getElementById("rewind");
-var forward = document.getElementById("forward");
-var timer = document.getElementById("timer");
-var duration;
-
-
-var timelineWidth = document.getElementById("somethingnothere").clientWidth;
-console.log(timelineWidth);
-music.addEventListener("timeupdate", timeUpdate, false);
-forward.addEventListener('click', function(e) {
-  console.log(music.currentTime);
-  console.log((music.currentTime + 2));
-  music.currentTime = (music.currentTime + 2);
-  mySeekableTimeRanges = music.seekable;
-  console.log(mySeekableTimeRanges, mySeekableTimeRanges.start(0), mySeekableTimeRanges.end(0));
-
-
-
-});
-rewind.addEventListener('click', function(e) {
-
-  music.currentTime = (music.currentTime - 2);
-
-
-});
-
-function timeUpdate() {
-	var playPercent = timelineWidth * (music.currentTime / duration);
-	playhead.style.width = playPercent + "px";
-
-	var secondsIn = Math.floor(music.currentTime);
-	if (secondsIn <= 9) {
-		timer.innerHTML = "0:0" + secondsIn;
-	} else {
-		timer.innerHTML = "0:" + secondsIn;
-	}
-}
-
-playButton.onclick = function() {
-
-    if(document.getElementById("play-i").className == "fas fa-pause button-icons delta"){
-      music.pause();
-      document.getElementById("play-s").innerHTML = "Play";
-
-        document.getElementById("play-i").className="fas fa-play button-icons delta";
-    }
-    else{
-	music.play();
-
-	document.getElementById("play-i").className = "fas fa-pause button-icons delta";
-	document.getElementById("play-s").innerHTML = "Pause";}
-}
-
-
-
-
-music.addEventListener("canplaythrough", function () {
-	duration = music.duration;
-}, false);}
-
-</script>
-<h1 style="font-size:50px;font-family: 'Montserrat', sans-serif;margin:0 auto;width:1000px;display:block;text-align : center;position:relative;">{{title.title}}</h1>
-<div class="media-controls" style="width:1000px;height:200px;position:absolute;top:20%;right:35%;border:2px solid orange;">
-  <div class="media-buttons">
-     <audio id="music" preload="auto" loop="false">
-               <source src="{{title.audio_file.url}}" type="audio/mp3">
-
-            </audio>
-
-
-    <button class="rewind-button media-button" label="rewind" id="rewind">
-      <i class="fas fa-backward button-icons"></i>
-      <span class="button-text milli">Rewind</span>
-    </button>
-
-    <button id="play" class="play-button media-button" label="play" style="">
-      <i class="fas fa-play button-icons delta" id="play-i"></i>
-      <span class="button-text milli" id="play-s">Play</span>
-    </button>
-
-    <button class="fast-forward-button media-button" label="fast forward" id="forward">
-
-      <i class="fas fa-forward button-icons"></i>
-      <span class="button-text milli">Forward</span>
-    </button>
-
-  </div>
-  <div class="media-progress" >
-    <div class="progress-bar-wrapper progress" id="somethingnothere">
-      <div class="progress-barsss" id="elapsed">
+  {% with e=title.embed_info %}
+  {% if e %}
+    {# Plays from an external link (Mega / YouTube / Vimeo / direct media). #}
+    {% if e.kind == 'iframe' %}
+      <div class="archive-embed">
+        <iframe src="{{ e.url }}" frameborder="0" allowfullscreen
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
       </div>
-    </div>
-
-  </div>
-  <div id="timer">
-    0:00
-  </div>
+      <a class="archive-open" href="{{ e.src }}" target="_blank" rel="noopener noreferrer">Open original link ↗</a>
+    {% elif e.kind == 'video' %}
+      <video class="archive-media" controls preload="metadata" playsinline>
+        <source src="{{ e.url }}">
+        Your browser can't play this video. <a href="{{ e.src }}" target="_blank" rel="noopener">Open the link ↗</a>
+      </video>
+    {% elif e.kind == 'audio' %}
+      <audio class="archive-media archive-audio" controls preload="metadata">
+        <source src="{{ e.url }}">
+        Your browser can't play this audio. <a href="{{ e.src }}" target="_blank" rel="noopener">Open the link ↗</a>
+      </audio>
+    {% endif %}
+  {% else %}
+    {# Plays from an uploaded file. #}
+    {% if title.is_Video %}
+      <video class="archive-media" controls preload="metadata" playsinline>
+        <source src="{{ title.video_file.url }}" type="video/mp4">
+      </video>
+    {% elif title.is_Audio %}
+      <audio class="archive-media archive-audio" controls preload="metadata">
+        <source src="{{ title.audio_file.url }}" type="audio/mpeg">
+      </audio>
+    {% elif title.is_Image %}
+      <img class="archive-media" src="{{ title.image_file.url }}" alt="{{ title.title }}">
+    {% endif %}
+  {% endif %}
+  {% endwith %}
 </div>
-{%endif%}
-{% if title.is_Video == True %}
-<h1 style="font-size:50px;font-family: 'Montserrat', sans-serif;margin:0 auto;width:1000px;display:block;text-align : center;position:relative;">{{title.title}}</h1>
-  <video controls style="
-    margin: 0 auto;
-    display: block;
-    position:relative;
-    top:200px;">
-
-    <source src="{{title.video_file.url}}" type="video/mp4">
-  </video>
-{%endif%}
-{% if title.is_Image == True %}
-  <h1 style="font-size:50px;font-family: 'Montserrat', sans-serif;margin:0 auto;width:1000px;display:block;text-align : center;position:relative;">{{title.title}}</h1>
-    <img src="{{title.image_file.url}}">
-{%endif%}
-
-{%endfor%}
-
-
-
-
-
-
-
-
-
+{% endfor %}
 
 {% endblock %}
-
