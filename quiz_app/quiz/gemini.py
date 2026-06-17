@@ -107,19 +107,22 @@ def build_record(mode, item, category):
                    explanation_text=item.get("explanation", ""), category=category, pub_date=now)
     if mode == "written":
         answer = item["answer"].strip()
-        return Written(question_text=item["question"], answer_text=_answer_syntax(answer, item.get("accepted")),
+        return Written(question_text=item["question"],
+                       answer_text=_answer_syntax(answer, item.get("accepted"), bool(item.get("strict"))),
                        display_answer=answer, explanation_text=item.get("explanation", ""),
                        category=category, pub_date=now)
     if mode == "connect":
         answer = item["answer"].strip()
-        return Connect(question_text=item["question"], answer_text=_answer_syntax(answer, item.get("accepted")),
+        return Connect(question_text=item["question"],
+                       answer_text=_answer_syntax(answer, item.get("accepted"), bool(item.get("strict"))),
                        display_answer=answer, hint_text=item.get("hint", ""),
                        explanation_text=item.get("explanation", ""), category=category,
                        isTimed=False, pub_date=now)  # images uploaded by hand
     if mode == "av":
         answer = item["answer"].strip()
         media_type = (item.get("media_type") or "audio").strip().lower()
-        return AudioVisual(question_text=item["question"], answer_text=_answer_syntax(answer, item.get("accepted")),
+        return AudioVisual(question_text=item["question"],
+                           answer_text=_answer_syntax(answer, item.get("accepted"), bool(item.get("strict"))),
                            display_answer=answer, hint_text=item.get("hint", ""),
                            explanation_text=item.get("explanation", ""), category=category,
                            is_Audio=(media_type != "video"), is_Video=(media_type == "video"),
@@ -127,14 +130,20 @@ def build_record(mode, item, category):
     raise ValueError("unknown mode %r" % mode)
 
 
-def _answer_syntax(answer, accepted):
-    """Build the '/canonical:/alt1:/alt2' fuzzy-match command syntax used by the
-    free-text rounds (written / connect / av)."""
+def _answer_syntax(answer, accepted, strict=False):
+    """Build the command syntax used by the free-text rounds (written/connect/av).
+
+    Fuzzy by default ('/canonical:/alt1'); when `strict` is set, uses the '/='
+    strict marker ('/=canonical:/=alt1') so near-misses are rejected — for exact
+    technical answers such as chemical names/formulae where 'sodium bicarbonate'
+    must NOT count as 'sodium carbonate'.
+    """
     answer = (answer or "").strip()
+    prefix = "/=" if strict else "/"
     seen, variants = set(), []
     for a in [answer] + [x.strip() for x in (accepted or []) if x and x.strip()]:
         if a and a.lower() not in seen:
-            seen.add(a.lower()); variants.append("/" + a)
+            seen.add(a.lower()); variants.append(prefix + a)
     return ":".join(variants)
 
 

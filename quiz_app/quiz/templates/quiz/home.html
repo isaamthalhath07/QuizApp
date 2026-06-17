@@ -22,6 +22,7 @@
     <ul id="navbar">
       <li><a href="/quiz/" class="selected navelement firstelement" style="font-family:'Montserrat';">Home</a></li>
       <li><a href="/quiz/about/" class="navelement" style="font-family:'Montserrat';">About</a></li>
+      <li><a href="/quiz/leaderboard/" class="navelement" style="font-family:'Montserrat';">Leaderboard</a></li>
       <li><a href="/quiz/archive/" class="lastelement navelement" style="font-family:'Montserrat';">Archive</a></li>
       <li>
         <form action="/quiz/logout/" method="post" style="display:inline;">
@@ -41,6 +42,24 @@
     <div class="fact-label"><img src="{% static 'assets/Facts.png' %}" style="width:26px;height:26px;border-radius:50%;"> Random fact</div>
     <div class="fact-body">{{ Facts }}</div>
   </div>
+
+  <a href="/quiz/leaderboard/" class="bento-board">
+    <div class="board-head">
+      <span class="board-title">🏆 Leaderboard</span>
+      <span class="board-mine">You: <strong data-points-total>{{ MyPoints }}</strong> pts</span>
+    </div>
+    <ol class="board-list">
+      {% for s in TopScores %}
+      <li class="{% if s.me %}is-me{% endif %}">
+        <span class="board-rank">{{ s.rank }}</span>
+        <span class="board-name">{{ s.name }}</span>
+        <span class="board-pts">{{ s.points }}</span>
+      </li>
+      {% empty %}
+      <li class="board-empty">No scores yet — answer a question to get on the board.</li>
+      {% endfor %}
+    </ol>
+  </a>
 
   <h2 class="bento-quiz-title">Take a quiz</h2>
 

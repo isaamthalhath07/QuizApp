@@ -6,42 +6,47 @@
 <script src="{% static 'assets/logic.js' %}"></script>
 <script src="{% static 'assets/connect.js' %}"></script>
 
-<div class="quiz-stage">
-  <div class="quiz-card">
+<div class="quiz-stage quiz-stage-wide">
+  <div class="quiz-card connect-layout">
 
-    {% if q.is_Audio %}
-    <audio class="av-media" controls preload="metadata">
-      <source src="{{ q.audio.url }}" type="audio/mpeg">
-      Your browser does not support audio.
-    </audio>
-    {% endif %}
+    <div class="connect-media">
+      {% if q.is_Audio %}
+      <audio class="av-media" controls preload="metadata">
+        <source src="{{ q.audio.url }}" type="audio/mpeg">
+        Your browser does not support audio.
+      </audio>
+      {% endif %}
 
-    {% if q.is_Video %}
-    <video class="av-media" controls preload="metadata" playsinline>
-      <source src="{{ q.video.url }}" type="video/mp4">
-      Your browser does not support video.
-    </video>
-    {% endif %}
-
-    <h2 class="quiz-question" id="cquestion" data-answer="{{q.answer_text}}">{{ q.question_text }}</h2>
-
-    <div class="hint-row">
-      <button type="button" id="hintbutton" class="hint-btn">Show hint</button>
-      <div id="hinthere" class="hint-text" style="display:none;">HINT: {{ q.hint_text }}</div>
+      {% if q.is_Video %}
+      <video class="av-media" controls preload="metadata" playsinline>
+        <source src="{{ q.video.url }}" type="video/mp4">
+        Your browser does not support video.
+      </video>
+      {% endif %}
     </div>
 
-    <textarea id="commentsss" class="answer-input" placeholder="Type your answer here..."></textarea>
+    <div class="connect-panel">
+      <h2 class="quiz-question" id="cquestion" data-answer="{{q.answer_text}}"
+          data-qid="{{ q.pk }}" data-round="av">{{ q.question_text }}</h2>
 
-    <div id="asdactivecorrect" class="feedback-card" style="display:none;">
-      <h2 id="asdCorrectOrNot" class="fb-verdict">Correct!</h2>
-      <h2 class="fb-answer">Answer:&nbsp;{{ q.display_answer }}</h2>
-      <hr/>
-      <p class="fb-exp">Explanation:<br>{{ q.explanation_text }}</p>
-    </div>
+      <div class="hint-row">
+        <button type="button" id="hintbutton" class="hint-btn">Show hint</button>
+        <div id="hinthere" class="hint-text" style="display:none;">HINT: {{ q.hint_text }}</div>
+      </div>
 
-    <div class="quiz-nav">
-      <button class="previous round" id="buttoon2" style="display:none;">&#8249;</button>
-      <button class="next round" id="buttoon" data-attr="{{Numberrr}}" style="display:none;">&#8250;</button>
+      <textarea id="commentsss" class="answer-input" placeholder="Type your answer, press Enter…"></textarea>
+
+      <div id="asdactivecorrect" class="feedback-card" style="display:none;">
+        <h2 id="asdCorrectOrNot" class="fb-verdict">Correct!</h2>
+        <h2 class="fb-answer">Answer:&nbsp;{{ q.display_answer }}</h2>
+        <hr/>
+        <p class="fb-exp">Explanation:<br>{{ q.explanation_text }}</p>
+      </div>
+
+      <div class="quiz-nav">
+        <button class="previous round" id="buttoon2" style="display:none;">&#8249;</button>
+        <button class="next round" id="buttoon" data-attr="{{Numberrr}}" style="display:none;">&#8250;</button>
+      </div>
     </div>
 
   </div>

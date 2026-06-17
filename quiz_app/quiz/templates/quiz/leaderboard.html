@@ -1,0 +1,35 @@
+{% extends "quiz/base.html" %}
+{% load static %}
+{% block body %}
+
+<div class="board-stage">
+  <div class="board-card">
+    <div class="board-hero">
+      <h1 class="board-h1">🏆 Leaderboard</h1>
+      <div class="board-self">
+        <span class="board-self-pts" data-points-total>{{ my.points }}</span>
+        <span class="board-self-label">your points{% if my_rank %} · rank #{{ my_rank }}{% endif %}</span>
+      </div>
+    </div>
+
+    <ol class="board-table">
+      <li class="board-row board-row-head">
+        <span class="c-rank">#</span>
+        <span class="c-name">Player</span>
+        <span class="c-correct">Correct</span>
+        <span class="c-pts">Points</span>
+      </li>
+      {% for r in rows %}
+      <li class="board-row{% if r.me %} is-me{% endif %}{% if r.rank <= 3 %} top-{{ r.rank }}{% endif %}">
+        <span class="c-rank">{% if r.rank == 1 %}🥇{% elif r.rank == 2 %}🥈{% elif r.rank == 3 %}🥉{% else %}{{ r.rank }}{% endif %}</span>
+        <span class="c-name">{{ r.name }}{% if r.me %} <em>(you)</em>{% endif %}</span>
+        <span class="c-correct">{{ r.correct }}/{{ r.answered }}</span>
+        <span class="c-pts">{{ r.points }}</span>
+      </li>
+      {% empty %}
+      <li class="board-row board-empty">No scores yet. Play a round and you'll show up here.</li>
+      {% endfor %}
+    </ol>
+  </div>
+</div>
+{% endblock %}

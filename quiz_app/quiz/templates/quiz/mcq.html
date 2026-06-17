@@ -37,6 +37,14 @@
         question.classList.add("answered-wrong");
         $("#wrong" + qNum).show();
       }
+      if (window.flashGlow) window.flashGlow(won);
+      var sel = [], clicked = question.querySelectorAll('[data-answer][data-clicked="1"]');
+      for (var j = 0; j < clicked.length; j++) sel.push(clicked[j].getAttribute("data-answer"));
+      var pk = question.getAttribute("data-pk");
+      if (window.recordScore && pk){
+        window.recordScore({mode: "mcq", qid: pk, selected: sel,
+          multiple: question.getAttribute("data-mode") === "True"});
+      }
     }
 
     if (question.getAttribute("data-mode") === "True"){
@@ -71,7 +79,7 @@
 <div class="mcq-stage">
   <form action="">
   {% for q in Questions %}
-  <div id="q{{forloop.counter}}" class="mcq-card" data-tries="" data-attempts="" data-mode="{{q.multiple}}">
+  <div id="q{{forloop.counter}}" class="mcq-card" data-tries="" data-attempts="" data-mode="{{q.multiple}}" data-pk="{{q.pk}}">
 
     <p class="mcq-q">{{ forloop.counter }})&nbsp;{{ q.question_text }}</p>
     {% if q.multiple %}<p class="mcq-note">*Multiple answers may apply</p>{% endif %}

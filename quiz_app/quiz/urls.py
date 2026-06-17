@@ -3,6 +3,8 @@ from . import views
 urlpatterns = [
 
     path('', views.home, name='QuizHome'),
+    path('score/', views.score, name='score'),
+    path('leaderboard/', views.leaderboard, name='leaderboard'),
     path('login/', views.loginl, name="bruuuuuuh"),
     path('logout/', views.logoutl, name="bruuuuuuhsdfgsdfgsdfsdfgsdfg"),
     path('archive/', views.archive_cats, name="bruuuusdffgjkjgfvbnjuuh"),

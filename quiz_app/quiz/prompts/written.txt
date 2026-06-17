@@ -9,6 +9,12 @@ Requirements:
 - Factually accurate; pitch at university / competition level.
 - Give a concise, informative "explanation" (1-3 sentences).
 - Vary subtopics. No duplicates.
+- "strict": set to true ONLY when the answer is an exact technical term where a
+  near-miss must be marked wrong — chemical names or formulae (e.g. "sodium
+  carbonate" vs "sodium bicarbonate"), scientific nomenclature, units, dates,
+  or code identifiers. For ordinary answers set it to false so minor typos and
+  word-order differences are still accepted. When strict is true, do NOT rely on
+  "accepted" for spelling tolerance — list only genuinely correct exact forms.
 
 Return ONLY a JSON array (no prose, no markdown) of objects with this exact shape:
 [
@@ -16,6 +22,7 @@ Return ONLY a JSON array (no prose, no markdown) of objects with this exact shap
     "question": "string",
     "answer": "canonical short answer",
     "accepted": ["alternative phrasing", "synonym", "..."],
+    "strict": false,
     "explanation": "string"
   }
 ]

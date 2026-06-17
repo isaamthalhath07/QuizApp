@@ -43,6 +43,7 @@ window.onload = function () {
         if (cmd.charAt(0) === "/"){
           if (cmd.charAt(1) === "#"){ results.push(soundex(answer.toLowerCase())===soundex(cmd.replace("#","").replace("/","").toLowerCase())?1:0); }
           else if (cmd.charAt(1) === "?"){ results.push(answer===cmd.replace("?","").replace("/","")?1:0); }
+          else if (cmd.charAt(1) === "="){ results.push(_normAns(answer)===_normAns(cmd.replace("=","").replace("/",""))?1:0); }
           else { results.push(looseMatch(answer, cmd.replace("/",""))?1:0); }
         } else if (cmd.charAt(0) === ","){
           var body=cmd.slice(2).toLowerCase(), aw=answer.toLowerCase().split(" "), cwds=body.split(" ");
@@ -66,6 +67,7 @@ window.onload = function () {
   var nextBtn = document.getElementById("buttoon");
   var prevBtn = document.getElementById("buttoon2");
   if (!ta || !qpara) return;
+  var qid = qpara.getAttribute("data-qid");
 
   function curNumber(){ var m=String(location.href).replace(/\/$/,'').match(/(\d+)$/); return m?parseInt(m[1]):1; }
   function showNav(){
@@ -98,7 +100,7 @@ window.onload = function () {
     if (remaining <= 0 && !answered) reveal(false);
   }
 
-  function reveal(correct){
+  function reveal(correct, answer){
     if (answered) return;
     answered = true;
     clearInterval(timer);
@@ -109,6 +111,8 @@ window.onload = function () {
       feedback.style.display = "block";
     }
     if (card) card.classList.add(correct ? "answered-correct" : "answered-wrong");
+    if (window.flashGlow) window.flashGlow(correct);
+    if (window.recordScore && qid) window.recordScore({mode: "written", qid: qid, answer: answer || ""});
     showNav();
   }
 
@@ -130,7 +134,7 @@ window.onload = function () {
     var answer = ta.value;
     if (answered){ ta.value=""; return; }
     if (gradeWritten(answer, qpara.getAttribute("data-answer") || "")){
-      reveal(true);
+      reveal(true, answer);
     } else {
       ta.classList.remove("shake"); void ta.offsetWidth; ta.classList.add("shake");
       flash("Not quite — try again");

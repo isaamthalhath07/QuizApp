@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 import json
 
 from io import BytesIO
@@ -106,6 +107,39 @@ class Facts(models.Model):
     category = models.CharField(max_length=2000)
     def __str__(self):
         return self.answer_text
+class Score(models.Model):
+    """Running point total per user (drives the leaderboard)."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                related_name='quiz_score')
+    points = models.IntegerField(default=0)
+    correct = models.IntegerField(default=0)
+    answered = models.IntegerField(default=0)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-points', '-correct']
+
+    def __str__(self):
+        return "%s — %d pts" % (self.user, self.points)
+
+
+class AnswerLog(models.Model):
+    """One row per (user, mode, question). Lets each question score only once."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                             related_name='quiz_answers')
+    mode = models.CharField(max_length=20)
+    question_id = models.IntegerField()
+    correct = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'mode', 'question_id')
+
+    def __str__(self):
+        return "%s %s#%s %s" % (self.user, self.mode, self.question_id,
+                                "✓" if self.correct else "✗")
+
+
 class Archive(models.Model):
     pub_date = models.DateTimeField()
     event = models.CharField(max_length=2000)

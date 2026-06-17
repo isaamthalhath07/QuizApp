@@ -10,7 +10,7 @@
   {% for q in Questions %}
   <div id="{{forloop.counter}}active" class="quiz-card" data-tries="0">
 
-    <div class="sentences quiz-question" id="qpara" data-answer="{{q.answer_text}}">
+    <div class="sentences quiz-question" id="qpara" data-answer="{{q.answer_text}}" data-qid="{{q.pk}}">
       <p>{{ q.question_text }}</p>
     </div>
 
