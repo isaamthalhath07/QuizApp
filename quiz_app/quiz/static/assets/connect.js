@@ -40,6 +40,7 @@ window.onload = function () {
         if (cmd.charAt(0)==="/"){
           if (cmd.charAt(1)==="#"){ results.push(soundex(answer.toLowerCase())===soundex(cmd.replace("#","").replace("/","").toLowerCase())?1:0); }
           else if (cmd.charAt(1)==="?"){ results.push(answer===cmd.replace("?","").replace("/","")?1:0); }
+          else if (cmd.charAt(1)==="="){ results.push(_normAns(answer)===_normAns(cmd.replace("=","").replace("/",""))?1:0); }
           else { results.push(looseMatch(answer, cmd.replace("/",""))?1:0); }
         } else if (cmd.charAt(0)===","){
           var body=cmd.slice(2).toLowerCase(), aw=answer.toLowerCase().split(" "), cwds=body.split(" ");
@@ -62,6 +63,8 @@ window.onload = function () {
   var nextBtn = document.getElementById("buttoon");
   var prevBtn = document.getElementById("buttoon2");
   if (!ta || !cq) return;
+  var qid   = cq.getAttribute("data-qid");
+  var round = cq.getAttribute("data-round") || "connect";   // "connect" or "av"
 
   /* hint toggle (no jumping, no border-size change) */
   if (hintBtn && hint){
@@ -87,17 +90,20 @@ window.onload = function () {
 
   /* submit / reveal */
   var answered=false;
-  function reveal(correct){
+  function reveal(correct, answer){
     if (answered) return; answered=true;
     if (verdict) verdict.innerHTML = correct ? "Correct!" : "Wrong";
     if (feedback){ feedback.classList.add(correct?"is-correct":"is-wrong"); feedback.style.display="block"; }
+    if (window.flashGlow) window.flashGlow(correct);
+    if (window.recordScore && qid) window.recordScore({mode: round, qid: qid, answer: answer || ""});
     showNav();
   }
   ta.addEventListener("keypress", function(e){
     if ((e.which||e.keyCode)!==13 || e.shiftKey) return;
     e.preventDefault();
     if (answered){ ta.value=""; return; }
-    reveal(gradeAnswer(ta.value, cq.getAttribute("data-answer") || ""));
+    var answer = ta.value;
+    reveal(gradeAnswer(answer, cq.getAttribute("data-answer") || ""), answer);
     ta.value="";
   });
 };

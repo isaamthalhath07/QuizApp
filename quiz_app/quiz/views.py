@@ -1,3 +1,4 @@
+import json
 import random
 
 from django.core.cache import cache
@@ -6,11 +7,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
 
 from quiz.models import Archive
 from quiz.models import AudioVisual
@@ -19,8 +23,15 @@ from quiz.models import Facts
 from quiz.models import MCQ
 from quiz.models import Question
 from quiz.models import Written
+from quiz.models import AnswerLog
+from quiz.models import Score
 
+from . import grading
 from .forms import UserForm
+
+# Points awarded the first time a user answers a given question correctly.
+POINTS_PER_CORRECT = 10
+_SCORED_MODELS = {"written": Written, "connect": Connect, "av": AudioVisual, "mcq": MCQ}
 
 abc = {
     "Science": ["Biology", "Maths", "Physics", "Chemistry"],
@@ -256,19 +267,97 @@ def home(request):
     random_item = random.choice(items) if items else None
     template = loader.get_template('quiz/home.html')
 
-    User = get_user_model()
-    users = list(User.objects.all()[:2])
-    first_user = users[0] if len(users) > 0 else None
-    second_user = users[1] if len(users) > 1 else None
+    top = [
+        {"rank": i, "name": s.user.username, "points": s.points,
+         "me": s.user_id == request.user.id}
+        for i, s in enumerate(Score.objects.select_related('user')[:5], 1)
+    ]
+    my_score, _ = Score.objects.get_or_create(user=request.user)
 
     context = {
         'Questions': Question.objects.all(),
         "Facts": random_item,
         'Category': abc,
         "userboi": request.user.username,
-        "FirstUser": first_user,
-        "SecondUser": second_user,
+        "TopScores": top,
+        "MyPoints": my_score.points,
     }
+    return HttpResponse(template.render(context, request))
+
+
+@login_required(login_url='/quiz/login/')
+@require_POST
+def score(request):
+    """Authoritatively re-grade one answer and award points the first time a
+    given question is answered correctly. Called by the round JS via fetch()."""
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({"error": "bad request"}, status=400)
+
+    mode = str(data.get('mode', ''))
+    model = _SCORED_MODELS.get(mode)
+    try:
+        qid = int(data.get('qid'))
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "bad qid"}, status=400)
+    if model is None:
+        return JsonResponse({"error": "bad mode"}, status=400)
+    try:
+        q = model.objects.get(pk=qid)
+    except model.DoesNotExist:
+        return JsonResponse({"error": "not found"}, status=404)
+
+    if mode == 'mcq':
+        selected = data.get('selected') or []
+        if not isinstance(selected, list):
+            selected = []
+        correct = grading.grade_mcq([str(s) for s in selected], q.answer_text, bool(q.multiple))
+    else:
+        correct = grading.grade_text(str(data.get('answer', '')), q.answer_text)
+
+    awarded = 0
+    with transaction.atomic():
+        score_obj, _ = Score.objects.get_or_create(user=request.user)
+        log, first = AnswerLog.objects.get_or_create(
+            user=request.user, mode=mode, question_id=qid,
+            defaults={"correct": correct})
+        # Award the first time a question is answered correctly. A previously
+        # wrong question can still earn points later, but a correct one never
+        # double-awards (no farming the same question).
+        if first:
+            score_obj.answered += 1
+            if correct:
+                score_obj.correct += 1
+                awarded = POINTS_PER_CORRECT
+        elif correct and not log.correct:
+            log.correct = True
+            log.save(update_fields=["correct"])
+            score_obj.correct += 1
+            awarded = POINTS_PER_CORRECT
+        if awarded:
+            score_obj.points += awarded
+        if first or awarded:
+            score_obj.save()
+
+    return JsonResponse({"correct": correct, "awarded": awarded,
+                         "points": score_obj.points, "first": first})
+
+
+@login_required(login_url='/quiz/login/')
+def leaderboard(request):
+    my_score, _ = Score.objects.get_or_create(user=request.user)
+    rows = []
+    my_rank = None
+    for i, s in enumerate(Score.objects.select_related('user')[:100], 1):
+        me = s.user_id == request.user.id
+        if me:
+            my_rank = i
+        rows.append({"rank": i, "name": s.user.username, "points": s.points,
+                     "correct": s.correct, "answered": s.answered, "me": me})
+    template = loader.get_template('quiz/leaderboard.html')
+    context = {"rows": rows, "userboi": request.user.username,
+               "my": my_score, "my_rank": my_rank}
     return HttpResponse(template.render(context, request))
 
 

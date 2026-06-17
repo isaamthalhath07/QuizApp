@@ -6,35 +6,40 @@
 <script src="{% static 'assets/logic.js' %}"></script>
 <script src="{% static 'assets/connect.js' %}"></script>
 
-<div class="quiz-stage">
-  <div class="quiz-card">
+<div class="quiz-stage quiz-stage-wide">
+  <div class="quiz-card connect-layout">
 
-    <div class="connect-grid">
-      <img src="{{q.image_1.url}}" alt="">
-      <img src="{{q.image_2.url}}" alt="">
-      <img src="{{q.image_3.url}}" alt="">
-      <img src="{{q.image_4.url}}" alt="">
+    <div class="connect-media">
+      <div class="connect-grid">
+        <img src="{{q.image_1.url}}" alt="">
+        <img src="{{q.image_2.url}}" alt="">
+        <img src="{{q.image_3.url}}" alt="">
+        <img src="{{q.image_4.url}}" alt="">
+      </div>
     </div>
 
-    <h2 class="quiz-question" id="cquestion" data-answer="{{q.answer_text}}">{{ q.question_text }}</h2>
+    <div class="connect-panel">
+      <h2 class="quiz-question" id="cquestion" data-answer="{{q.answer_text}}"
+          data-qid="{{ q.pk }}" data-round="connect">{{ q.question_text }}</h2>
 
-    <div class="hint-row">
-      <button type="button" id="hintbutton" class="hint-btn">Show hint</button>
-      <div id="hinthere" class="hint-text" style="display:none;">HINT: {{ q.hint_text }}</div>
-    </div>
+      <div class="hint-row">
+        <button type="button" id="hintbutton" class="hint-btn">Show hint</button>
+        <div id="hinthere" class="hint-text" style="display:none;">HINT: {{ q.hint_text }}</div>
+      </div>
 
-    <textarea id="commentsss" class="answer-input" placeholder="Type your answer here..."></textarea>
+      <textarea id="commentsss" class="answer-input" placeholder="Type your answer, press Enter…"></textarea>
 
-    <div id="asdactivecorrect" class="feedback-card" style="display:none;">
-      <h2 id="asdCorrectOrNot" class="fb-verdict">Correct!</h2>
-      <h2 class="fb-answer">Answer:&nbsp;{{ q.display_answer }}</h2>
-      <hr/>
-      <p class="fb-exp">Explanation:<br>{{ q.explanation_text }}</p>
-    </div>
+      <div id="asdactivecorrect" class="feedback-card" style="display:none;">
+        <h2 id="asdCorrectOrNot" class="fb-verdict">Correct!</h2>
+        <h2 class="fb-answer">Answer:&nbsp;{{ q.display_answer }}</h2>
+        <hr/>
+        <p class="fb-exp">Explanation:<br>{{ q.explanation_text }}</p>
+      </div>
 
-    <div class="quiz-nav">
-      <button class="previous round" id="buttoon2" style="display:none;">&#8249;</button>
-      <button class="next round" id="buttoon" data-attr="{{Numberrr}}" style="display:none;">&#8250;</button>
+      <div class="quiz-nav">
+        <button class="previous round" id="buttoon2" style="display:none;">&#8249;</button>
+        <button class="next round" id="buttoon" data-attr="{{Numberrr}}" style="display:none;">&#8250;</button>
+      </div>
     </div>
 
   </div>

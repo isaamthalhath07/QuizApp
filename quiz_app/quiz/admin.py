@@ -5,7 +5,7 @@ from django.urls import path
 
 from . import gemini
 from . import taxonomy
-from .models import Question, MCQ, Written, Connect, AudioVisual, Facts, Archive
+from .models import Question, MCQ, Written, Connect, AudioVisual, Facts, Archive, Score, AnswerLog
 
 admin.site.register(Question)
 admin.site.register(MCQ)
@@ -14,6 +14,19 @@ admin.site.register(Connect)
 admin.site.register(AudioVisual)
 admin.site.register(Facts)
 admin.site.register(Archive)
+
+
+@admin.register(Score)
+class ScoreAdmin(admin.ModelAdmin):
+    list_display = ("user", "points", "correct", "answered", "updated")
+    ordering = ("-points",)
+
+
+@admin.register(AnswerLog)
+class AnswerLogAdmin(admin.ModelAdmin):
+    list_display = ("user", "mode", "question_id", "correct", "created")
+    list_filter = ("mode", "correct")
+
 
 admin.site.site_header = "Quizite admin"
 admin.site.site_title = "Quizite admin"

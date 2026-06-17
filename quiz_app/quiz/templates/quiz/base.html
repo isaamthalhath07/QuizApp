@@ -13,9 +13,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
 <script src="{% static 'assets/logic.js' %}"></script>
+<script>window.CSRF_TOKEN = "{{ csrf_token }}";</script>
+<script src="{% static 'assets/score.js' %}"></script>
 
 </head>
 <body>
+<div id="answer-glow"></div>
 <div>
 
 <div class="wrapper">
@@ -24,6 +27,7 @@
           <ul id="navbar">
             <li><a href="/quiz/" class="selected navelement firstelement" style=" font-family: 'Montserrat';">Home</a></li>
             <li><a href="/quiz/about/" class="navelement" style=" font-family: 'Montserrat';">About</a></li>
+            <li><a href="/quiz/leaderboard/" class="navelement" style=" font-family: 'Montserrat';">Leaderboard</a></li>
 
               <li><a href="/quiz/archive/" class="lastelement navelement" style=" font-family: 'Montserrat';">Archive</a></li>
             <li>
